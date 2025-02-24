@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class NewMonoBehaviourScript : MonoBehaviour
 {
@@ -6,7 +7,7 @@ public class NewMonoBehaviourScript : MonoBehaviour
 
     [SerializeField] private Transform feetPosition;
     [SerializeField] private Rigidbody rb;
-    
+    [SerializeField] private PlayerInput playerControls;
 
     private Vector3 gravityVector;
     private RaycastHit groundCheck;
@@ -16,6 +17,7 @@ public class NewMonoBehaviourScript : MonoBehaviour
         rb = gameObject.GetComponent<Rigidbody>();
         gravityVector = new Vector3(0, -9.8f * playerMass, 0);
         feetPosition = transform.GetChild(0).GetComponent<Transform>();
+        playerControls = gameObject.GetComponent<PlayerInput>();
     }
 
     void Start()
