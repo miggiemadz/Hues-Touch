@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -5,12 +6,13 @@ using UnityEngine.InputSystem;
 public class NewMonoBehaviourScript : MonoBehaviour
 {
     [SerializeField] private float playerMass;
+    [SerializeField] private float playerRotateSpeed;
     [SerializeField] private float playerGroundMoveAcceleration;
     [SerializeField] private float playerGroundMoveDecceleration;
     [SerializeField] private float PLAYER_MAX_SPEED;
     private Vector2 playerGroundMoveSpeed;
     private Vector2 playerGroundMoveVelocity;
-    private bool isMoving;
+    private Quaternion playerDirection;
 
     [SerializeField] private Transform feetPosition;
     [SerializeField] private Rigidbody rb;
@@ -38,11 +40,17 @@ public class NewMonoBehaviourScript : MonoBehaviour
     void Update()
     {
         moveDirection = playerMovement.action.ReadValue<Vector2>();
-        isMoving = moveDirection != Vector2.zero;
+        transform.rotation = Quaternion.Slerp(transform.rotation, playerDirection, playerRotateSpeed * Time.deltaTime);
+
+        PlayerMovementRotation(moveDirection);
+
+        Debug.Log(playerDirection);
+
     }
 
     private void FixedUpdate()
     {
+
         if (moveDirection.y != 0 || moveDirection.x != 0)
         {
             playerGroundMoveSpeed.x += playerGroundMoveAcceleration * Time.deltaTime * moveDirection.x;
@@ -75,16 +83,15 @@ public class NewMonoBehaviourScript : MonoBehaviour
                                         transform.position.z + playerGroundMoveSpeed.y));
         }
 
-        if (!isGrounded())
+        if (!IsGrounded())
         {
             rb.MovePosition(new Vector3(transform.position.x, transform.position.y + gravity * Time.deltaTime, transform.position.z));
         }
 
         Debug.DrawRay(transform.position, transform.TransformDirection(Vector3.forward), Color.yellow);
-        Debug.Log(groundCheck.distance);
     }
 
-    private bool isGrounded()
+    private bool IsGrounded()
     {
         if (Physics.Raycast(feetPosition.position, transform.TransformDirection(Vector3.down), out groundCheck, Mathf.Infinity))
         {
@@ -92,5 +99,27 @@ public class NewMonoBehaviourScript : MonoBehaviour
             return groundCheck.distance < .2f;
         }
         return false;
+    }
+
+    private void PlayerMovementRotation(Vector2 movementInput)
+    {
+        var directionMap = new Dictionary<(float, float), float>
+        {
+            { (0, 1), 0 },   // North
+            { (.707107f, .707107f), 45 },   // North East
+            { (1, 0), 90 },   // East
+            { (.707107f, -.707107f), 135 },  // South East
+            { (0, -1), 180 },  // South
+            { (-.707107f, -.707107f), 225 }, // South West
+            { (-1, 0), 270 },  // West
+            { (-.707107f, .707107f), 315 }   // North West
+        };
+        float direction;
+
+        if (directionMap.TryGetValue((movementInput.x, movementInput.y),out direction))
+        {
+            playerDirection = Quaternion.Euler(0, direction, 0);
+        }
+        
     }
 }

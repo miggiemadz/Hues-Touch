@@ -1851,7 +1851,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1364543090083470997, guid: 73953690641359141b5840864452e61d, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 4.62
+      value: 9.69
       objectReference: {fileID: 0}
     - target: {fileID: 1364543090083470997, guid: 73953690641359141b5840864452e61d, type: 3}
       propertyPath: m_LocalPosition.z
@@ -1892,6 +1892,10 @@ PrefabInstance:
     - target: {fileID: 7508261593684622401, guid: 73953690641359141b5840864452e61d, type: 3}
       propertyPath: PLAYER_MAX_SPEED
       value: 0.2
+      objectReference: {fileID: 0}
+    - target: {fileID: 7508261593684622401, guid: 73953690641359141b5840864452e61d, type: 3}
+      propertyPath: playerRotateSpeed
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 7508261593684622401, guid: 73953690641359141b5840864452e61d, type: 3}
       propertyPath: playerControls.m_Id
