@@ -1890,6 +1890,10 @@ PrefabInstance:
       value: 
       objectReference: {fileID: -1680190386980627800, guid: 052faaac586de48259a63d0c4782560b, type: 3}
     - target: {fileID: 7508261593684622401, guid: 73953690641359141b5840864452e61d, type: 3}
+      propertyPath: PLAYER_MAX_SPEED
+      value: 0.2
+      objectReference: {fileID: 0}
+    - target: {fileID: 7508261593684622401, guid: 73953690641359141b5840864452e61d, type: 3}
       propertyPath: playerControls.m_Id
       value: b3484a66-02f4-4858-af03-8836a4041c2b
       objectReference: {fileID: 0}
@@ -1900,6 +1904,18 @@ PrefabInstance:
     - target: {fileID: 7508261593684622401, guid: 73953690641359141b5840864452e61d, type: 3}
       propertyPath: playerGroundMoveSpeed
       value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 7508261593684622401, guid: 73953690641359141b5840864452e61d, type: 3}
+      propertyPath: playerGroundMoveVelocity
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7508261593684622401, guid: 73953690641359141b5840864452e61d, type: 3}
+      propertyPath: playerGroundMoveAcceleration
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7508261593684622401, guid: 73953690641359141b5840864452e61d, type: 3}
+      propertyPath: playerGroundMoveDecceleration
+      value: 1.2
       objectReference: {fileID: 0}
     - target: {fileID: 8290580429369205154, guid: 73953690641359141b5840864452e61d, type: 3}
       propertyPath: m_Name
