@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.AI;
 
 public class EnemyAI : MonoBehaviour {
+    // Core variables for enemy
     public NavMeshAgent agent;
     public Transform player;
     public LayerMask WhatIsGround, WhatIsPlayer;
@@ -34,9 +35,7 @@ public class EnemyAI : MonoBehaviour {
 
         if (!PlayerInSightRange && !PlayerInAttackRange) Patrolling();
         if (PlayerInSightRange && !PlayerInAttackRange) ChasePlayer();
-        if (PlayerInSightRange && PlayerInAttackRange) AttackPlayer();
-        Debug.Log($"PlayerInSightRange: {PlayerInSightRange}, PlayerInAttackRange: {PlayerInAttackRange}"); //debug
- 
+        if (PlayerInSightRange && PlayerInAttackRange) AttackPlayer(); 
     }
 
     private void Patrolling() {
@@ -72,13 +71,14 @@ public class EnemyAI : MonoBehaviour {
     if (!AlreadyAttacked) {
         if (projectile != null) {
             GameObject proj = Instantiate(projectile, transform.position + transform.forward, Quaternion.identity);
-            Rigidbody rb = proj.GetComponent<Rigidbody>();
+            Projectile projScript = proj.GetComponent<Projectile>();
 
-            if (rb != null) {
-                rb.linearVelocity = (player.position - transform.position).normalized * 20f; // Shoots toward player
+            if (projScript != null) {
+                Vector3 shootDirection = (player.position - transform.position).normalized;
+                projScript.SetDirection(shootDirection);
+            } else {
+                Debug.LogError("Projectile script is missing on the instantiated projectile!");
             }
-        } else {
-            Debug.LogError("Projectile is not assigned in the Inspector!");
         }
 
         AlreadyAttacked = true;
@@ -97,10 +97,12 @@ public class EnemyAI : MonoBehaviour {
         if (health <= 0) Invoke(nameof(DestroyEnemy), 0.5f);
     }
 
+    // Death
     private void DestroyEnemy() {
         Destroy(gameObject);
     }
 
+    // Just to showcase the enemy when turning on gizmos
     private void OnDrawGizmosSelected() {
         Gizmos.color = Color.red;
         Gizmos.DrawWireSphere(transform.position, AttackRange);

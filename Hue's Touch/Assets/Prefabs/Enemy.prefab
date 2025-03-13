@@ -134,10 +134,10 @@ MonoBehaviour:
     m_Bits: 8
   WalkPoint: {x: 639.294, y: -208.8854, z: -753.3493}
   WalkPointRange: 50
-  TimeBetweenAttacks: 2
+  TimeBetweenAttacks: 1
   projectile: {fileID: 4105635836826058001, guid: c39bf872a2d119e4d9d1b1750fb86495, type: 3}
-  SightRange: 30
-  AttackRange: 10
+  SightRange: 10
+  AttackRange: 5
   PlayerInSightRange: 0
   PlayerInAttackRange: 0
   health: 100
