@@ -15,8 +15,6 @@ public class Projectile : MonoBehaviour {
     public void SetDirection(Vector3 direction) {
         if (rb != null) {
             rb.AddForce(direction * speed, ForceMode.Impulse); 
-            Debug.Log("Projectile Velocity: " + rb.linearVelocity);
-
         }
     }
 
