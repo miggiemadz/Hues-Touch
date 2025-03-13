@@ -1,0 +1,110 @@
+using UnityEngine;
+using UnityEngine.AI;
+
+public class EnemyAI : MonoBehaviour {
+    public NavMeshAgent agent;
+    public Transform player;
+    public LayerMask WhatIsGround, WhatIsPlayer;
+
+    // Patrolling
+    public Vector3 WalkPoint;
+    bool WalkPointSet;
+    public float WalkPointRange;
+
+    // Attacking
+    public float TimeBetweenAttacks;
+    bool AlreadyAttacked;
+    public GameObject projectile;
+
+    // States
+    public float SightRange, AttackRange;
+    public bool PlayerInSightRange, PlayerInAttackRange;
+
+    // Enemy health
+    public int health = 100;
+
+    private void Awake() {
+        player = GameObject.Find("TestPlayer").transform;
+        agent = GetComponent<NavMeshAgent>();
+    }
+
+    private void Update() {
+        PlayerInSightRange = Physics.CheckSphere(transform.position, SightRange, WhatIsPlayer);
+        PlayerInAttackRange = Physics.CheckSphere(transform.position, AttackRange, WhatIsPlayer);
+
+        if (!PlayerInSightRange && !PlayerInAttackRange) Patrolling();
+        if (PlayerInSightRange && !PlayerInAttackRange) ChasePlayer();
+        if (PlayerInSightRange && PlayerInAttackRange) AttackPlayer();
+        Debug.Log($"PlayerInSightRange: {PlayerInSightRange}, PlayerInAttackRange: {PlayerInAttackRange}"); //debug
+ 
+    }
+
+    private void Patrolling() {
+        if (!WalkPointSet) SearchWalkPoint();
+
+        if (WalkPointSet)
+            agent.SetDestination(WalkPoint);
+
+        Vector3 DistanceToWalkPoint = transform.position - WalkPoint;
+        if (DistanceToWalkPoint.magnitude < 1f)
+            WalkPointSet = false;
+    }
+
+    private void SearchWalkPoint() {
+        float RandomX = Random.Range(-WalkPointRange, WalkPointRange);
+        float RandomZ = Random.Range(-WalkPointRange, WalkPointRange);
+
+        WalkPoint = new Vector3(transform.position.x + RandomX, transform.position.y, transform.position.z + RandomZ);
+
+        // Ensure the point is on the ground
+        if (Physics.Raycast(WalkPoint, -transform.up, 2f, WhatIsGround)) 
+            WalkPointSet = true;
+    }
+
+    private void ChasePlayer() {
+        agent.SetDestination(player.position);
+    }
+
+    private void AttackPlayer() {
+    agent.SetDestination(transform.position); // Stop moving
+    transform.LookAt(player);
+
+    if (!AlreadyAttacked) {
+        if (projectile != null) {
+            GameObject proj = Instantiate(projectile, transform.position + transform.forward, Quaternion.identity);
+            Rigidbody rb = proj.GetComponent<Rigidbody>();
+
+            if (rb != null) {
+                rb.linearVelocity = (player.position - transform.position).normalized * 20f; // Shoots toward player
+            }
+        } else {
+            Debug.LogError("Projectile is not assigned in the Inspector!");
+        }
+
+        AlreadyAttacked = true;
+        Invoke(nameof(ResetAttack), TimeBetweenAttacks);
+    }
+}
+
+
+    private void ResetAttack() {
+        AlreadyAttacked = false;
+    }
+
+    public void TakeDamage(int damage) {
+        health -= damage;
+
+        if (health <= 0) Invoke(nameof(DestroyEnemy), 0.5f);
+    }
+
+    private void DestroyEnemy() {
+        Destroy(gameObject);
+    }
+
+    private void OnDrawGizmosSelected() {
+        Gizmos.color = Color.red;
+        Gizmos.DrawWireSphere(transform.position, AttackRange);
+        Gizmos.color = Color.yellow;
+        Gizmos.DrawWireSphere(transform.position, SightRange);
+    }
+}
