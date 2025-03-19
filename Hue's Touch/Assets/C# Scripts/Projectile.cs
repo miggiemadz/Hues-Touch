@@ -2,6 +2,7 @@ using UnityEngine;
 
 public class Projectile : MonoBehaviour {
     private Rigidbody rb;
+    [Header("Projectile Customization")]
     public float speed = 20f; 
     public float lifetime = 5f;
 
