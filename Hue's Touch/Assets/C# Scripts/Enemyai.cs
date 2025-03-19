@@ -3,26 +3,23 @@ using UnityEngine.AI;
 
 public class EnemyAI : MonoBehaviour {
     // Core variables for enemy
+    [Header("Core Enemy Variables")]
     public NavMeshAgent agent;
     public Transform player;
     public LayerMask WhatIsGround, WhatIsPlayer;
-
-    // Patrolling
     public Vector3 WalkPoint;
-    bool WalkPointSet;
-    public float WalkPointRange;
-
-    // Attacking
-    public float TimeBetweenAttacks;
-    bool AlreadyAttacked;
-    public GameObject projectile;
-
-    // States
-    public float SightRange, AttackRange;
     public bool PlayerInSightRange, PlayerInAttackRange;
+    bool WalkPointSet;
+    bool AlreadyAttacked;
 
-    // Enemy health
+    [Header("Enemy Customization")]
+
     public int health = 100;
+    public float WalkPointRange;
+    public float SightRange, AttackRange;
+    public float TimeBetweenAttacks;
+
+    public GameObject projectile;
 
     private void Awake() {
         player = GameObject.Find("TestPlayer").transform;
