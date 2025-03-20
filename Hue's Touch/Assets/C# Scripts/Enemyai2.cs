@@ -22,6 +22,9 @@ public class Enemyai2 : MonoBehaviour {
     public float TimeBetweenAttacks;
     [SerializeField] private GameObject projectile;
 
+
+
+
     private void Awake()
     {
         player = GameObject.Find("TestPlayer").transform;
