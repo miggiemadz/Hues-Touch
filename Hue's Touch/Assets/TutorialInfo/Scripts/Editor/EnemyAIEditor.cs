@@ -7,11 +7,13 @@ public class EnemyAI2Editor : Editor {
     SerializedProperty projectileProperty;
 
     private void OnEnable() {
+        if (target == null) return;
         enemyTypeProperty = serializedObject.FindProperty("enemyType");
         projectileProperty = serializedObject.FindProperty("projectile");
     }
 
     public override void OnInspectorGUI() {
+        if (target == null) return;
         serializedObject.Update(); // Sync with the actual object
 
         // ✅ Draw all default properties **except projectile**

@@ -1947,6 +1947,14 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 2717420768743799179, guid: b27af59e218ca354f90396947c5caf0e, type: 3}
+      propertyPath: enemyType
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2717420768743799179, guid: b27af59e218ca354f90396947c5caf0e, type: 3}
+      propertyPath: AttackRange
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 3898236228221519605, guid: b27af59e218ca354f90396947c5caf0e, type: 3}
       propertyPath: m_LocalPosition.x
       value: -5.393179

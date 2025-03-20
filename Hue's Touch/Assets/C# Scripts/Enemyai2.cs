@@ -10,10 +10,10 @@ public class Enemyai2 : MonoBehaviour {
     public bool PlayerInSightRange, PlayerInAttackRange;
     bool WalkPointSet;
     bool AlreadyAttacked;
+    
     public enum EnemyType { Melee, Ranged }
-    public EnemyType enemyType;
-
     [Header("Enemy Customization")]
+    public EnemyType enemyType;
 
     public int health = 100;
     public float WalkPointRange;
