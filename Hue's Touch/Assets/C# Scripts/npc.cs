@@ -4,7 +4,7 @@ using UnityEngine.InputSystem;
 public class NPCDialogue : MonoBehaviour {
     [Header("Interaction Settings")]
     [SerializeField] private float interactionDistance = 3f;
-    
+
     [TextArea(2, 5)]
     public string[] dialogueLines;
 
@@ -56,7 +56,7 @@ public class NPCDialogue : MonoBehaviour {
         Debug.Log("End of dialogue");
     }
     private void OnDrawGizmosSelected(){
-        Gizmos.color = Color.yellow;
+        Gizmos.color = Color.cyan;
         Gizmos.DrawWireSphere(transform.position, interactionDistance);
     }
 }
