@@ -5,6 +5,7 @@ public class Projectile : MonoBehaviour {
     [Header("Projectile Customization")]
     public float speed = 20f; 
     public float lifetime = 5f;
+    [SerializeField] private int Damage = 20;
 
     private void Awake() {
         rb = GetComponent<Rigidbody>();
@@ -21,8 +22,13 @@ public class Projectile : MonoBehaviour {
 
     private void OnTriggerEnter(Collider other) {
         if (other.CompareTag("Player")) {
-            Destroy(gameObject);
+            NewMonoBehaviourScript player = other.GetComponent<NewMonoBehaviourScript>();
+            if (player != null) {
+                player.TakeDamage(Damage);
+            }
+        
         }
+    Destroy(gameObject);
     }
 
     private void Start() {
