@@ -147,23 +147,25 @@ public class NewMonoBehaviourScript : MonoBehaviour
     private void Die(){ // -- steven (add death machanics or wtv)
         Debug.Log(":(");
     }
-    private void ShootProjectile() { // --steven
-    Debug.Log("shooting");
-    if (projectilePrefab == null || shootPoint == null) return;
+    private void ShootProjectile() {
+    if (projectilePrefab == null) {
+        Debug.LogError("No projectile prefab assigned!");
+        return;
+    }
 
-    GameObject proj = Instantiate(projectilePrefab, transform.position + transform.forward, Quaternion.identity);
-            Projectile projScript = proj.GetComponent<Projectile>();
+    // Determine spawn position and direction
+    Vector3 spawnPos = transform.position + transform.forward; // or use shootPoint.position if you have one
+    Vector3 shootDirection = transform.forward;
 
-            if (projScript != null)
-            {
-                Vector3 shootDirection = (shootPoint.position - transform.position).normalized;
-                projScript.SetDirection(shootDirection);
-            }
-            }
+    // Instantiate and launch
+    GameObject proj = Instantiate(projectilePrefab, spawnPos, Quaternion.identity);
+    Projectile projScript = proj.GetComponent<Projectile>();
 
-    // Give it forward velocity
- 
-    
+    if (projScript != null) {
+        projScript.SetDirection(shootDirection);
+    } else {
+        Debug.LogError("Projectile script is missing on the instantiated projectile!");}
+    }    
 }
 
 
