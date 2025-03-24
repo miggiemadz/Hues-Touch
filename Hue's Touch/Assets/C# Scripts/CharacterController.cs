@@ -30,8 +30,6 @@ public class NewMonoBehaviourScript : MonoBehaviour
     [Header("Combat Settings")] // --steven
     [SerializeField] private GameObject projectilePrefab;
     [SerializeField] private Transform shootPoint; // where the projectile spawns from
-    [SerializeField] private float projectileSpeed = 20f;
-
 
     private void Awake()
     {
@@ -53,9 +51,7 @@ public class NewMonoBehaviourScript : MonoBehaviour
         transform.rotation = Quaternion.Slerp(transform.rotation, playerDirection, playerRotateSpeed * Time.deltaTime);
         // ^ the characters rotations is a Quaternion slerp that starts at its current rotation and interpolates to a new rotation whenever the playerDirection is updated
         if (Keyboard.current.eKey.wasPressedThisFrame) { // sorry to put this here but i might as well -- steven
-        ShootProjectile();
-        Debug.Log("E");
-}
+        ShootProjectile();}
 
     }
 
@@ -147,7 +143,7 @@ public class NewMonoBehaviourScript : MonoBehaviour
     private void Die(){ // -- steven (add death machanics or wtv)
         Debug.Log(":(");
     }
-    private void ShootProjectile() {
+    private void ShootProjectile() { // -- steven
     if (projectilePrefab == null) {
         Debug.LogError("No projectile prefab assigned!");
         return;

@@ -4,7 +4,7 @@ public class Projectile : MonoBehaviour {
     private Rigidbody rb;
     [Header("Projectile Customization")]
     public float speed = 20f; 
-    public float lifetime = 5f;
+    public float lifetime = 1f;
     [SerializeField] private int Damage = 20;
 
     private void Awake() {
@@ -27,6 +27,12 @@ public class Projectile : MonoBehaviour {
                 player.TakeDamage(Damage);
             }
         
+        }
+        if (other.CompareTag("Enemy")) {
+            Enemyai2 enemy = other.GetComponent<Enemyai2>();
+            if (enemy != null) {
+                enemy.TakeDamage(Damage);
+            }
         }
     Destroy(gameObject);
     }

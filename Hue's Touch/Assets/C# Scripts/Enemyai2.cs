@@ -17,10 +17,10 @@ public class Enemyai2 : MonoBehaviour {
     [SerializeField] private EnemyType enemyType;
 
     [SerializeField] private int health = 100;
-    [SerializeField] private float WalkPointRange;
+    [SerializeField] private float WalkPointRange = 50;
 
-    [SerializeField] private float SightRange, AttackRange;
-    [SerializeField] private float TimeBetweenAttacks;
+    [SerializeField] private float SightRange = 25, AttackRange = 10;
+    [SerializeField] private float TimeBetweenAttacks = 2;
     [SerializeField] private GameObject projectile;
 
 
@@ -128,7 +128,7 @@ public class Enemyai2 : MonoBehaviour {
     public void TakeDamage(int damage)
     {
         health -= damage;
-
+        Debug.Log("I got shot!!");
         if (health <= 0) Invoke(nameof(DestroyEnemy), 0.5f);
     }
 

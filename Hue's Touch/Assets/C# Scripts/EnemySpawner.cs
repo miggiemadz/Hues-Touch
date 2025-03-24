@@ -9,7 +9,6 @@ public class EnemySpawner : MonoBehaviour {
     [SerializeField] private int maxEnemies = 5;
 
     [Header("NavMesh Settings")]
-    [SerializeField] private float navMeshCheckRadius = 2f;
     [SerializeField] private LayerMask navMeshLayer;
 
     private int currentEnemyCount = 0;
@@ -25,7 +24,7 @@ public class EnemySpawner : MonoBehaviour {
         randomPoint.y = transform.position.y; // Keep it level with spawner
 
         // Try to find a position on the NavMesh near that point
-        if (NavMesh.SamplePosition(randomPoint, out NavMeshHit hit, navMeshCheckRadius, NavMesh.AllAreas)) {
+        if (NavMesh.SamplePosition(randomPoint, out NavMeshHit hit, spawnRadius, NavMesh.AllAreas)) {
             GameObject enemy = Instantiate(enemyPrefab, hit.position, Quaternion.identity);
             currentEnemyCount++;
 
@@ -42,5 +41,8 @@ public class EnemySpawner : MonoBehaviour {
     public void EnemyDied() {
         currentEnemyCount--;
     }
-
+    private void OnDrawGizmosSelected(){
+        Gizmos.color = Color.yellow;
+        Gizmos.DrawWireSphere(transform.position, spawnRadius);
+    }
 }
