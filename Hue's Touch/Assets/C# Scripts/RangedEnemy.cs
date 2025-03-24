@@ -91,10 +91,13 @@ public class RangedEnemy : MonoBehaviour {
     }
 
     // Death
-    private void DestroyEnemy() {
+    private void DestroyEnemy()
+    {
+        if (spawner != null) {
+            spawner.EnemyDied();
+        }
         Destroy(gameObject);
     }
-
     // Just to showcase the enemy when turning on gizmos
     private void OnDrawGizmosSelected() {
         Gizmos.color = Color.red;

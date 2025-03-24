@@ -29,7 +29,11 @@ public class EnemySpawner : MonoBehaviour {
             GameObject enemy = Instantiate(enemyPrefab, hit.position, Quaternion.identity);
             currentEnemyCount++;
 
-            
+            // talk to enemy created
+            Enemyai2 ai = enemy.GetComponent<Enemyai2>();
+            if (ai != null) {
+                ai.spawner = this;
+            }
         } else {
             Debug.Log("Could not find NavMesh position near: " + randomPoint);
         }

@@ -10,7 +10,8 @@ public class Enemyai2 : MonoBehaviour {
     private bool PlayerInSightRange, PlayerInAttackRange;
     private bool WalkPointSet;
     private bool AlreadyAttacked;
-    
+    public EnemySpawner spawner; 
+
     public enum EnemyType { Melee, Ranged }
     [Header("Enemy Customization")]
     [SerializeField] private EnemyType enemyType;
@@ -134,6 +135,9 @@ public class Enemyai2 : MonoBehaviour {
     // Death
     private void DestroyEnemy()
     {
+        if (spawner != null) {
+            spawner.EnemyDied();
+        }
         Destroy(gameObject);
     }
 
