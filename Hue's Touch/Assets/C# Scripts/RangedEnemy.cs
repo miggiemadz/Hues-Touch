@@ -11,6 +11,7 @@ public class RangedEnemy : MonoBehaviour {
     private bool PlayerInSightRange, PlayerInAttackRange;
     private bool WalkPointSet;
     private bool AlreadyAttacked;
+    public EnemySpawner spawner; 
     [Header("Enemy Customization")]
     [SerializeField] private int health = 100;
     [SerializeField] private float WalkPointRange;
@@ -91,13 +92,10 @@ public class RangedEnemy : MonoBehaviour {
     }
 
     // Death
-    private void DestroyEnemy()
-    {
-        if (spawner != null) {
-            spawner.EnemyDied();
-        }
+    private void DestroyEnemy() {
         Destroy(gameObject);
     }
+
     // Just to showcase the enemy when turning on gizmos
     private void OnDrawGizmosSelected() {
         Gizmos.color = Color.red;
