@@ -15,6 +15,7 @@ public class NewMonoBehaviourScript : MonoBehaviour
     private Vector2 playerGroundMoveVelocity; // the directional velocity that the player travels in
 
     [Header("Other Variables")]
+    public float PlayerHealth = 100;
     [SerializeField] private float playerMass; // the mass of the player
     private float gravity; // the gravity force value
 
@@ -25,6 +26,12 @@ public class NewMonoBehaviourScript : MonoBehaviour
     [SerializeField] private InputActionReference playerMovement; // the user input references from unity's new input system
     private RaycastHit groundCheck; // the raycast hit reference that checks for floor collisions
     private Vector2 moveDirection; // the movement vector that gets it's values based on user input
+
+    [Header("Combat Settings")] // --steven
+    [SerializeField] private GameObject projectilePrefab;
+    [SerializeField] private Transform shootPoint; // where the projectile spawns from
+    [SerializeField] private float projectileSpeed = 20f;
+
 
     private void Awake()
     {
@@ -45,6 +52,11 @@ public class NewMonoBehaviourScript : MonoBehaviour
         moveDirection = playerMovement.action.ReadValue<Vector2>(); // moveDirections vector2 values are read from the playerMovement input map
         transform.rotation = Quaternion.Slerp(transform.rotation, playerDirection, playerRotateSpeed * Time.deltaTime);
         // ^ the characters rotations is a Quaternion slerp that starts at its current rotation and interpolates to a new rotation whenever the playerDirection is updated
+        if (Keyboard.current.eKey.wasPressedThisFrame) { // sorry to put this here but i might as well -- steven
+        ShootProjectile();
+        Debug.Log("E");
+}
+
     }
 
     private void FixedUpdate()
@@ -126,4 +138,32 @@ public class NewMonoBehaviourScript : MonoBehaviour
         }
         
     }
+    public void TakeDamage(int damage) { // -- steven
+        PlayerHealth -= damage;
+        if (PlayerHealth <= 0) {
+            Die();
+        }
+    }
+    private void Die(){ // -- steven (add death machanics or wtv)
+        Debug.Log(":(");
+    }
+    private void ShootProjectile() { // --steven
+    Debug.Log("shooting");
+    if (projectilePrefab == null || shootPoint == null) return;
+
+    GameObject proj = Instantiate(projectilePrefab, transform.position + transform.forward, Quaternion.identity);
+            Projectile projScript = proj.GetComponent<Projectile>();
+
+            if (projScript != null)
+            {
+                Vector3 shootDirection = (shootPoint.position - transform.position).normalized;
+                projScript.SetDirection(shootDirection);
+            }
+            }
+
+    // Give it forward velocity
+ 
+    
 }
+
+
