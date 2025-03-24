@@ -1,26 +1,22 @@
 using UnityEngine;
 using UnityEngine.AI;
 
-public class EnemyAI : MonoBehaviour {
+public class RangedEnemy : MonoBehaviour {
     // Core variables for enemy
-    [Header("Core Enemy Variables")]
-    public NavMeshAgent agent;
-    public Transform player;
-    public LayerMask WhatIsGround, WhatIsPlayer;
-    public Vector3 WalkPoint;
-    public bool PlayerInSightRange, PlayerInAttackRange;
-    bool WalkPointSet;
-    bool AlreadyAttacked;
-
+   [Header("Core Enemy Variables")]
+    [SerializeField]  private NavMeshAgent agent;
+    [SerializeField] private Transform player;
+    [SerializeField] private LayerMask WhatIsGround, WhatIsPlayer;
+    private Vector3 WalkPoint;
+    private bool PlayerInSightRange, PlayerInAttackRange;
+    private bool WalkPointSet;
+    private bool AlreadyAttacked;
     [Header("Enemy Customization")]
-
-    public int health = 100;
-    public float WalkPointRange;
-    public float SightRange, AttackRange;
-    public float TimeBetweenAttacks;
-
-    public GameObject projectile;
-
+    [SerializeField] private int health = 100;
+    [SerializeField] private float WalkPointRange;
+    [SerializeField] private float SightRange, AttackRange;
+    [SerializeField] private float TimeBetweenAttacks;
+    [SerializeField] private GameObject projectile;
     private void Awake() {
         player = GameObject.Find("TestPlayer").transform;
         agent = GetComponent<NavMeshAgent>();

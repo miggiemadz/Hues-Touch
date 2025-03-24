@@ -3,23 +3,23 @@ using UnityEngine;
 using UnityEngine.AI;
 public class Enemyai2 : MonoBehaviour {
     [Header("Core Enemy Variables")]
-    public NavMeshAgent agent;
-    public Transform player;
-    public LayerMask WhatIsGround, WhatIsPlayer;
-    public Vector3 WalkPoint;
-    public bool PlayerInSightRange, PlayerInAttackRange;
-    bool WalkPointSet;
-    bool AlreadyAttacked;
+    [SerializeField]  private NavMeshAgent agent;
+    [SerializeField] private Transform player;
+    [SerializeField] private LayerMask WhatIsGround, WhatIsPlayer;
+    private Vector3 WalkPoint;
+    private bool PlayerInSightRange, PlayerInAttackRange;
+    private bool WalkPointSet;
+    private bool AlreadyAttacked;
     
     public enum EnemyType { Melee, Ranged }
     [Header("Enemy Customization")]
-    public EnemyType enemyType;
+    [SerializeField] private EnemyType enemyType;
 
-    public int health = 100;
-    public float WalkPointRange;
+    [SerializeField] private int health = 100;
+    [SerializeField] private float WalkPointRange;
 
-    public float SightRange, AttackRange;
-    public float TimeBetweenAttacks;
+    [SerializeField] private float SightRange, AttackRange;
+    [SerializeField] private float TimeBetweenAttacks;
     [SerializeField] private GameObject projectile;
 
 
@@ -124,7 +124,7 @@ public class Enemyai2 : MonoBehaviour {
         AlreadyAttacked = false;
     }
 
-    private void TakeDamage(int damage)
+    public void TakeDamage(int damage)
     {
         health -= damage;
 
