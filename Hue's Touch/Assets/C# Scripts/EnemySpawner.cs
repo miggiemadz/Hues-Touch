@@ -29,7 +29,7 @@ public class EnemySpawner : MonoBehaviour {
             GameObject enemy = Instantiate(enemyPrefab, hit.position, Quaternion.identity);
             currentEnemyCount++;
 
-            /
+            
         } else {
             Debug.Log("Could not find NavMesh position near: " + randomPoint);
         }
