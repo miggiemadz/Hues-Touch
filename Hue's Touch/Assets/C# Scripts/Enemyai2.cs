@@ -1,7 +1,8 @@
 ﻿using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.AI;
-public class Enemyai2 : MonoBehaviour {
+public class Enemyai2 : MonoBehaviour
+{
     [Header("Core Enemy Variables")]
     [SerializeField]  private NavMeshAgent agent;
     [SerializeField] private Transform player;
@@ -23,14 +24,12 @@ public class Enemyai2 : MonoBehaviour {
     [SerializeField] private float TimeBetweenAttacks = 2;
     [SerializeField] private GameObject projectile;
 
-
-
-
     private void Awake()
     {
         player = GameObject.Find("TestPlayer").transform;
         agent = GetComponent<NavMeshAgent>();
-}
+    }
+
     private void OnValidate()
     {
         if (enemyType == EnemyType.Melee)
@@ -39,6 +38,7 @@ public class Enemyai2 : MonoBehaviour {
             AttackRange = 1;
         }
     }
+
     private void Update()
     {
         PlayerInSightRange = Physics.CheckSphere(transform.position, SightRange, WhatIsPlayer);
@@ -51,14 +51,19 @@ public class Enemyai2 : MonoBehaviour {
 
     private void Patrolling()
     {
-        if (!WalkPointSet) SearchWalkPoint();
-
+        if (!WalkPointSet)
+        {
+            SearchWalkPoint();
+        }
         if (WalkPointSet)
+        {
             agent.SetDestination(WalkPoint);
-
+        }
         Vector3 DistanceToWalkPoint = transform.position - WalkPoint;
         if (DistanceToWalkPoint.magnitude < 1f)
+        {
             WalkPointSet = false;
+        }
     }
 
     private void SearchWalkPoint()
@@ -70,7 +75,9 @@ public class Enemyai2 : MonoBehaviour {
 
         // Ensure the point is on the ground
         if (Physics.Raycast(WalkPoint, -transform.up, 2f, WhatIsGround))
+        {
             WalkPointSet = true;
+        }
     }
 
     private void ChasePlayer()
@@ -82,14 +89,17 @@ public class Enemyai2 : MonoBehaviour {
     {
         agent.SetDestination(transform.position); // Stop moving
         transform.LookAt(player);
-        if (!AlreadyAttacked) {
+        if (!AlreadyAttacked)
+        {
             if (enemyType == EnemyType.Ranged)
             {
                 RangeAttack();
-            } else { 
+            }
+            else
+            { 
                 MeleeAttack(); 
             }
-                AlreadyAttacked = true;
+            AlreadyAttacked = true;
             Invoke(nameof(ResetAttack), TimeBetweenAttacks);
         }
     }
@@ -100,7 +110,6 @@ public class Enemyai2 : MonoBehaviour {
         {
             GameObject proj = Instantiate(projectile, transform.position + transform.forward, Quaternion.identity);
             Projectile projScript = proj.GetComponent<Projectile>();
-
             if (projScript != null)
             {
                 Vector3 shootDirection = (player.position - transform.position).normalized;
@@ -112,6 +121,7 @@ public class Enemyai2 : MonoBehaviour {
             }
         }
     }
+
     private void MeleeAttack()
     {
          if (Vector3.Distance(transform.position, player.position) < AttackRange + 1)
@@ -129,13 +139,16 @@ public class Enemyai2 : MonoBehaviour {
     {
         health -= damage;
         Debug.Log("I got shot!!");
-        if (health <= 0) Invoke(nameof(DestroyEnemy), 0.5f);
+        if (health <= 0){
+            Invoke(nameof(Die), 0.5f);
+        }
     }
 
     // Death
-    private void DestroyEnemy()
+    private void Die()
     {
-        if (spawner != null) {
+        if (spawner != null)
+        {
             spawner.EnemyDied();
         }
         Destroy(gameObject);
@@ -150,5 +163,3 @@ public class Enemyai2 : MonoBehaviour {
         Gizmos.DrawWireSphere(transform.position, SightRange);
     }
 }
-
-

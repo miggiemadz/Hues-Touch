@@ -1,43 +1,54 @@
 using UnityEngine;
 
-public class Projectile : MonoBehaviour {
+public class Projectile : MonoBehaviour
+{
     private Rigidbody rb;
     [Header("Projectile Customization")]
     public float speed = 20f; 
     public float lifetime = 1f;
     [SerializeField] private int Damage = 20;
 
-    private void Awake() {
+    private void Awake()
+    {
         rb = GetComponent<Rigidbody>();
-        if (rb == null) {
+        if (rb == null)
+        {
             Debug.LogError("Projectile is missing a Rigidbody!");
         }
     }
 
-    public void SetDirection(Vector3 direction) {
-        if (rb != null) {
+    public void SetDirection(Vector3 direction)
+    {
+        if (rb != null)
+        {
             rb.AddForce(direction * speed, ForceMode.Impulse); 
         }
     }
 
-    private void OnTriggerEnter(Collider other) {
-        if (other.CompareTag("Player")) {
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.CompareTag("Player"))
+        {
             NewMonoBehaviourScript player = other.GetComponent<NewMonoBehaviourScript>();
-            if (player != null) {
+            if (player != null)
+            {
                 player.TakeDamage(Damage);
             }
         
         }
-        if (other.CompareTag("Enemy")) {
+        if (other.CompareTag("Enemy"))
+        {
             Enemyai2 enemy = other.GetComponent<Enemyai2>();
-            if (enemy != null) {
+            if (enemy != null)
+            {
                 enemy.TakeDamage(Damage);
             }
         }
     Destroy(gameObject);
     }
 
-    private void Start() {
+    private void Start()
+    {
         Destroy(gameObject, lifetime);
     }
 }
