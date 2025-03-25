@@ -141,7 +141,7 @@ public class NewMonoBehaviourScript : MonoBehaviour
         }
     }
     private void Die(){ // -- steven (add death machanics or wtv)
-        Debug.Log(":(");
+        Debug.Log("Main character died");
     }
     private void ShootProjectile() { // -- steven
     if (projectilePrefab == null) {

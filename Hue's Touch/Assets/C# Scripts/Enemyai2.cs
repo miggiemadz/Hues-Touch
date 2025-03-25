@@ -126,7 +126,7 @@ public class Enemyai2 : MonoBehaviour
     {
          if (Vector3.Distance(transform.position, player.position) < AttackRange + 1)
         {
-            Debug.Log("pow!");
+            Debug.Log("melee attack!");
         }
         
     }
