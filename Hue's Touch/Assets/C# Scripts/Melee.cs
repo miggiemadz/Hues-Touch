@@ -1,6 +1,7 @@
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.AI;
+
 public class Melee : MonoBehaviour
 {
     [Header("Core Enemy Variables")]
@@ -108,7 +109,6 @@ public class Melee : MonoBehaviour
         }
     }
 
-    // Death
     private void Die()
     {
         if (spawner != null)

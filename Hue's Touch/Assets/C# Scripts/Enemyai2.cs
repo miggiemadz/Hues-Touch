@@ -23,6 +23,7 @@ public class Enemyai2 : MonoBehaviour
     [SerializeField] private float SightRange = 25, AttackRange = 10;
     [SerializeField] private float TimeBetweenAttacks = 2;
     [SerializeField] private GameObject projectile;
+    [SerializeField] private int MeleeDamage = 20;
 
     private void Awake()
     {
@@ -127,6 +128,7 @@ public class Enemyai2 : MonoBehaviour
          if (Vector3.Distance(transform.position, player.position) < AttackRange + 1)
         {
             Debug.Log("melee attack!");
+            player.TakeDamage(MeleeDamage);
         }
         
     }
