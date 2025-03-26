@@ -16,14 +16,12 @@ public class Enemyai2 : MonoBehaviour
     public enum EnemyType { Melee, Ranged }
     [Header("Enemy Customization")]
     [SerializeField] private EnemyType enemyType;
-
     [SerializeField] private int health = 100;
     [SerializeField] private float WalkPointRange = 50;
-
     [SerializeField] private float SightRange = 25, AttackRange = 10;
     [SerializeField] private float TimeBetweenAttacks = 2;
     [SerializeField] private GameObject projectile;
-    [SerializeField] private int MeleeDamage = 20;
+    [SerializeField] private int MeleeDamage;
 
     private void Awake()
     {
@@ -123,14 +121,17 @@ public class Enemyai2 : MonoBehaviour
         }
     }
 
-    private void MeleeAttack()
-    {
-         if (Vector3.Distance(transform.position, player.position) < AttackRange + 1)
+    private void MeleeAttack() {        
+        Debug.Log("Enemy performed melee attack!");
+        NewMonoBehaviourScript playerScript = player.GetComponent<NewMonoBehaviourScript>();
+        if (playerScript != null)
         {
-            Debug.Log("melee attack!");
-            player.TakeDamage(MeleeDamage);
+            playerScript.TakeDamage(MeleeDamage);
         }
-        
+        else
+        {
+            Debug.LogWarning("Could not find player script to apply damage.");
+        }
     }
     private void ResetAttack()
     {
@@ -141,7 +142,8 @@ public class Enemyai2 : MonoBehaviour
     {
         health -= damage;
         Debug.Log("I got shot!!");
-        if (health <= 0){
+        if (health <= 0)
+        {
             Invoke(nameof(Die), 0.5f);
         }
     }

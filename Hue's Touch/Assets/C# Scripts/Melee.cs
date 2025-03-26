@@ -86,16 +86,19 @@ public class Melee : MonoBehaviour
             Invoke(nameof(ResetAttack), TimeBetweenAttacks);
     }
     
-    private void MeleeAttack()
-    {
-         if (Vector3.Distance(transform.position, player.position) < AttackRange + 1)
-        {
-            Debug.Log("melee attack!");
-            player.TakeDamage(Damage);
+    private void MeleeAttack() {
+    if (Vector3.Distance(transform.position, player.position) < AttackRange + 1f) {
+        Debug.Log("Enemy performed melee attack!");
+
+        // Get the player's health script
+        NewMonoBehaviourScript playerScript = player.GetComponent<NewMonoBehaviourScript>();
+        if (playerScript != null) {
+            playerScript.TakeDamage(Damage);
+        } else {
+            Debug.LogWarning("Could not find player script to apply damage.");
         }
-        
     }
-    private void ResetAttack()
+}    private void ResetAttack()
     {
         AlreadyAttacked = false;
     }
