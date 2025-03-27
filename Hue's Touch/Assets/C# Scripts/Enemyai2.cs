@@ -16,7 +16,6 @@ public class Enemyai2 : MonoBehaviour
     public enum EnemyType { Melee, Ranged }
     [Header("Enemy Customization")]
     [SerializeField] private EnemyType enemyType;
-    [SerializeField] private int health = 100;
     [SerializeField] private float WalkPointRange = 50;
     [SerializeField] private float SightRange = 25, AttackRange = 10;
     [SerializeField] private float TimeBetweenAttacks = 2;
@@ -123,7 +122,7 @@ public class Enemyai2 : MonoBehaviour
 
     private void MeleeAttack() {        
         Debug.Log("Enemy performed melee attack!");
-        NewMonoBehaviourScript playerScript = player.GetComponent<NewMonoBehaviourScript>();
+        Health playerScript = player.GetComponent<Health>();
         if (playerScript != null)
         {
             playerScript.TakeDamage(MeleeDamage);
@@ -137,27 +136,6 @@ public class Enemyai2 : MonoBehaviour
     {
         AlreadyAttacked = false;
     }
-
-    public void TakeDamage(int damage)
-    {
-        health -= damage;
-        Debug.Log("I got shot!!");
-        if (health <= 0)
-        {
-            Invoke(nameof(Die), 0.5f);
-        }
-    }
-
-    // Death
-    private void Die()
-    {
-        if (spawner != null)
-        {
-            spawner.EnemyDied();
-        }
-        Destroy(gameObject);
-    }
-
     // Just to showcase the enemy when turning on gizmos
     private void OnDrawGizmosSelected()
     {

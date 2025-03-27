@@ -15,7 +15,6 @@ public class NewMonoBehaviourScript : MonoBehaviour
     private Vector2 playerGroundMoveVelocity; // the directional velocity that the player travels in
 
     [Header("Other Variables")]
-    public float PlayerHealth = 100;
     [SerializeField] private float playerMass; // the mass of the player
     private float gravity; // the gravity force value
 
@@ -134,15 +133,7 @@ public class NewMonoBehaviourScript : MonoBehaviour
         }
         
     }
-    public void TakeDamage(int damage) { // -- steven
-        PlayerHealth -= damage;
-        if (PlayerHealth <= 0) {
-            Die();
-        }
-    }
-    private void Die(){ // -- steven (add death machanics or wtv)
-        Debug.Log("Main character died");
-    }
+ 
     private void ShootProjectile() { // -- steven
     if (projectilePrefab == null) {
         Debug.LogError("No projectile prefab assigned!");

@@ -27,22 +27,14 @@ public class Projectile : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.CompareTag("Player"))
+        if (other.CompareTag("Player") || other.CompareTag("Enemy"))
         {
-            NewMonoBehaviourScript player = other.GetComponent<NewMonoBehaviourScript>();
+            Health player = other.GetComponent<Health>();
             if (player != null)
             {
                 player.TakeDamage(Damage);
             }
         
-        }
-        if (other.CompareTag("Enemy"))
-        {
-            Enemyai2 enemy = other.GetComponent<Enemyai2>();
-            if (enemy != null)
-            {
-                enemy.TakeDamage(Damage);
-            }
         }
     Destroy(gameObject);
     }

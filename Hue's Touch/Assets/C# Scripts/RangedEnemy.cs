@@ -13,7 +13,6 @@ public class RangedEnemy : MonoBehaviour {
     private bool AlreadyAttacked;
     public EnemySpawner spawner; 
     [Header("Enemy Customization")]
-    [SerializeField] private int health = 100;
     [SerializeField] private float WalkPointRange;
     [SerializeField] private float SightRange, AttackRange;
     [SerializeField] private float TimeBetweenAttacks;
@@ -102,22 +101,6 @@ public class RangedEnemy : MonoBehaviour {
     {
         AlreadyAttacked = false;
     }
-
-    public void TakeDamage(int damage)
-    {
-        health -= damage;
-        Debug.Log("I got shot 2");
-        if (health <= 0)
-        {Invoke(nameof(Die), 0.5f);
-        }
-    }
-
-    // Death
-    private void Die()
-    {
-        Destroy(gameObject);
-    }
-
     // Just to showcase the enemy when turning on gizmos
     private void OnDrawGizmosSelected()
     {
