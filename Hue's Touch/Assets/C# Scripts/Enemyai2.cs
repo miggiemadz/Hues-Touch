@@ -21,6 +21,7 @@ public class Enemyai2 : MonoBehaviour
     [SerializeField] private float TimeBetweenAttacks = 2;
     [SerializeField] private GameObject projectile;
     [SerializeField] private int MeleeDamage;
+    [SerializeField] private bool Provoked = false;
 
     private void Awake()
     {
@@ -43,8 +44,11 @@ public class Enemyai2 : MonoBehaviour
         PlayerInAttackRange = Physics.CheckSphere(transform.position, AttackRange, WhatIsPlayer);
 
         if (!PlayerInSightRange && !PlayerInAttackRange) Patrolling();
+        if (Provoked)
+        {
         if (PlayerInSightRange && !PlayerInAttackRange) ChasePlayer();
         if (PlayerInSightRange && PlayerInAttackRange) AttackPlayer();
+        }
     }
 
     private void Patrolling()
@@ -143,5 +147,9 @@ public class Enemyai2 : MonoBehaviour
         Gizmos.DrawWireSphere(transform.position, AttackRange);
         Gizmos.color = Color.yellow;
         Gizmos.DrawWireSphere(transform.position, SightRange);
+    }
+    public void Provoke()
+    {
+        Provoked = true;
     }
 }

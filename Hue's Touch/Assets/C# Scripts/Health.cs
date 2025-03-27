@@ -71,6 +71,10 @@ public class Health : MonoBehaviour // I HATE UI IT SUCKSSSSSSS ;-;
     public void TakeDamage(float amount)
     {
         currentHealth -= amount;
+        try{
+        GetComponent<Enemyai2>().Provoke();
+        } 
+        catch (System.Exception e){Debug.Log(e.Message);}
         if (currentHealth <= 0)
         {
             Debug.Log("Dead");
