@@ -25,12 +25,14 @@ public class NewMonoBehaviourScript : MonoBehaviour
     [SerializeField] private InputActionReference playerMovement; // the user input references from unity's new input system
     private RaycastHit groundCheck; // the raycast hit reference that checks for floor collisions
     private Vector2 moveDirection; // the movement vector that gets it's values based on user input
+    [SerializeField] private GameObject camera;
 
     private void Awake()
     {
         rb = gameObject.GetComponent<Rigidbody>();
         gravity = -9.8f * playerMass;
         feetPosition = transform.GetChild(0).GetComponent<Transform>();
+        camera = transform.GetChild(2).gameObject;
     }
 
     void Start()
@@ -52,6 +54,8 @@ public class NewMonoBehaviourScript : MonoBehaviour
 
         if (moveDirection.y != 0 || moveDirection.x != 0) // if either of the move inputs are pressed (vertical or horizontal)
         {
+            gameObject.transform.rotation = Quaternion.Slerp(gameObject.transform.rotation, camera.transform.rotation, playerRotateSpeed * Time.deltaTime);
+
             playerGroundMoveVelocity.x += playerGroundMoveAcceleration * Time.deltaTime * moveDirection.x; 
             playerGroundMoveVelocity.y += playerGroundMoveAcceleration * Time.deltaTime * moveDirection.y;
             // ^ updates the velocity in respects to acceleration, time and direction for the y and x axis
