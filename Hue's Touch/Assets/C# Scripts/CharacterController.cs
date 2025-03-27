@@ -42,6 +42,11 @@ public class NewMonoBehaviourScript : MonoBehaviour
 
     void Update()
     {
+        if (moveDirection == Vector2.up)
+        {
+            transform.forward = camera.transform.forward;
+        }
+
         PlayerMovementRotation(moveDirection); // takes the moveDirection and updates the playerDirection
 
         moveDirection = playerMovement.action.ReadValue<Vector2>(); // moveDirections vector2 values are read from the playerMovement input map
@@ -54,8 +59,6 @@ public class NewMonoBehaviourScript : MonoBehaviour
 
         if (moveDirection.y != 0 || moveDirection.x != 0) // if either of the move inputs are pressed (vertical or horizontal)
         {
-            gameObject.transform.rotation = Quaternion.Slerp(gameObject.transform.rotation, camera.transform.rotation, playerRotateSpeed * Time.deltaTime);
-
             playerGroundMoveVelocity.x += playerGroundMoveAcceleration * Time.deltaTime * moveDirection.x; 
             playerGroundMoveVelocity.y += playerGroundMoveAcceleration * Time.deltaTime * moveDirection.y;
             // ^ updates the velocity in respects to acceleration, time and direction for the y and x axis

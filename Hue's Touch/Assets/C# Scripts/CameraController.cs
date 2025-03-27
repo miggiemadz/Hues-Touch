@@ -21,17 +21,34 @@ public class CameraController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        currentMousePosition = Input.mousePosition;
+        currentMousePosition.x = Input.mousePosition.x;
+        currentMousePosition.y = Input.mousePosition.y;
 
         if (Input.GetMouseButton(1)) 
         {
-            cof.VerticalAxis.Value += 
+            if (currentMousePosition.x > oldMousePosition.x)
+            {
+                cof.HorizontalAxis.Value += cameraSensitivityX;
+            }
+
+            if (currentMousePosition.x < oldMousePosition.x)
+            {
+                cof.HorizontalAxis.Value -= cameraSensitivityX;
+            }
+
+            if (currentMousePosition.y > oldMousePosition.y)
+            {
+                cof.VerticalAxis.Value -= cameraSensitivityY;
+            }
+
+            if (currentMousePosition.y < oldMousePosition.y)
+            {
+                cof.VerticalAxis.Value += cameraSensitivityY;
+            }
         }
 
-        if (Input.GetMouseButtonUp(1))
-        {
-            currentMousePosition = Vector3.zero;
-        }
-
+        oldMousePosition = currentMousePosition;
     }
+
+
 }
