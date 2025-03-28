@@ -4,13 +4,17 @@ using UnityEngine.InputSystem;
 
 public class CameraController : MonoBehaviour
 {
+    [Header("Camera Components")]
     [SerializeField] private GameObject camera;
     [SerializeField] private CinemachineOrbitalFollow cof;
-    private Vector3 currentMousePosition;
-    private Vector3 oldMousePosition;
-    private Vector3 mouseDirection;
+    [SerializeField] private InputActionReference cameraInput;
+
+    [Header("Camera Values")]
     [SerializeField] private float cameraSensitivityY;
     [SerializeField] private float cameraSensitivityX;
+    private Vector2 cameraMovement;
+    [SerializeField] private float cameraDeadZoneX;
+    [SerializeField] private float cameraDeadZoneY;
 
     void Awake()
     {
@@ -21,34 +25,18 @@ public class CameraController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        currentMousePosition.x = Input.mousePosition.x;
-        currentMousePosition.y = Input.mousePosition.y;
+        cameraMovement = cameraInput.action.ReadValue<Vector2>();
 
-        if (Input.GetMouseButton(1)) 
+        if (Mathf.Abs(cameraMovement.x) > cameraDeadZoneX)
         {
-            if (currentMousePosition.x > oldMousePosition.x)
-            {
-                cof.HorizontalAxis.Value += cameraSensitivityX;
-            }
-
-            if (currentMousePosition.x < oldMousePosition.x)
-            {
-                cof.HorizontalAxis.Value -= cameraSensitivityX;
-            }
-
-            if (currentMousePosition.y > oldMousePosition.y)
-            {
-                cof.VerticalAxis.Value -= cameraSensitivityY;
-            }
-
-            if (currentMousePosition.y < oldMousePosition.y)
-            {
-                cof.VerticalAxis.Value += cameraSensitivityY;
-            }
+            cof.HorizontalAxis.Value = cof.HorizontalAxis.Value + Mathf.Sign(cameraMovement.x) * cameraSensitivityX;
         }
 
-        oldMousePosition = currentMousePosition;
-    }
+        if (Mathf.Abs(cameraMovement.y) > cameraDeadZoneY)
+        {
+            cof.VerticalAxis.Value = Mathf.Clamp(cof.VerticalAxis.Value + Mathf.Sign(cameraMovement.y) * cameraSensitivityY, -10, 45);
+        }
 
+    }
 
 }

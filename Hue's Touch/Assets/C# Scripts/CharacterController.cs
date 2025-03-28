@@ -17,6 +17,7 @@ public class NewMonoBehaviourScript : MonoBehaviour
     [Header("Other Variables")]
     [SerializeField] private float playerMass; // the mass of the player
     private float gravity; // the gravity force value
+    [SerializeField] private float rotationSpeed;
 
     [Header("Other Components")]
     private Quaternion playerDirection; // the rotational value of the character model in respect to its forward facing vector
@@ -24,15 +25,15 @@ public class NewMonoBehaviourScript : MonoBehaviour
     [SerializeField] private Rigidbody rb; // the kinematic rigidbody that holds all the physics components
     [SerializeField] private InputActionReference playerMovement; // the user input references from unity's new input system
     private RaycastHit groundCheck; // the raycast hit reference that checks for floor collisions
-    private Vector2 moveDirection; // the movement vector that gets it's values based on user input
-    [SerializeField] private GameObject camera;
+    private Vector3 moveDirection; // the movement vector that gets it's values based on user input
+    [SerializeField] private Transform camera;
 
     private void Awake()
     {
         rb = gameObject.GetComponent<Rigidbody>();
         gravity = -9.8f * playerMass;
         feetPosition = transform.GetChild(0).GetComponent<Transform>();
-        camera = transform.GetChild(2).gameObject;
+        camera = transform.GetChild(2).gameObject.transform;
     }
 
     void Start()
@@ -42,28 +43,32 @@ public class NewMonoBehaviourScript : MonoBehaviour
 
     void Update()
     {
-        if (moveDirection == Vector2.up)
-        {
-            transform.forward = camera.transform.forward;
-        }
+        Vector3 inputDirection = new Vector3(playerMovement.action.ReadValue<Vector2>().x, 0, playerMovement.action.ReadValue<Vector2>().y).normalized;
 
-        PlayerMovementRotation(moveDirection); // takes the moveDirection and updates the playerDirection
+        Vector3 cameraFoward = camera.transform.forward;
+        cameraFoward.y = 0;
+        cameraFoward.Normalize();
 
-        moveDirection = playerMovement.action.ReadValue<Vector2>(); // moveDirections vector2 values are read from the playerMovement input map
-        transform.rotation = Quaternion.Slerp(transform.rotation, playerDirection, playerRotateSpeed * Time.deltaTime);
-        // ^ the characters rotations is a Quaternion slerp that starts at its current rotation and interpolates to a new rotation whenever the playerDirection is updated
+        Vector3 cameraRight = camera.transform.right;
+        cameraRight.y = 0;
+        cameraRight.Normalize();
+        moveDirection = cameraFoward * inputDirection.z + cameraRight * inputDirection.x; // moveDirections vector2 values are read from the playerMovement input map
+
     }
 
     private void FixedUpdate()
     {
 
-        if (moveDirection.y != 0 || moveDirection.x != 0) // if either of the move inputs are pressed (vertical or horizontal)
+        if (moveDirection.z != 0 || moveDirection.x != 0) // if either of the move inputs are pressed (vertical or horizontal)
         {
+            Quaternion playerRotation = Quaternion.LookRotation(moveDirection);
+            rb.MoveRotation(Quaternion.Slerp(rb.rotation, playerRotation, rotationSpeed * Time.deltaTime));
+
             playerGroundMoveVelocity.x += playerGroundMoveAcceleration * Time.deltaTime * moveDirection.x; 
-            playerGroundMoveVelocity.y += playerGroundMoveAcceleration * Time.deltaTime * moveDirection.y;
+            playerGroundMoveVelocity.y += playerGroundMoveAcceleration * Time.deltaTime * moveDirection.z;
             // ^ updates the velocity in respects to acceleration, time and direction for the y and x axis
 
-            if (moveDirection.y != 0 && moveDirection.x != 0) // if both move inputs are pressed (vertical and horizontal)
+            if (moveDirection.z != 0 && moveDirection.x != 0) // if both move inputs are pressed (vertical and horizontal)
             {
                 playerGroundMoveVelocity.x = Mathf.Clamp(playerGroundMoveVelocity.x, -PLAYER_MAX_SPEED / Mathf.Sqrt(2), PLAYER_MAX_SPEED / Mathf.Sqrt(2));
                 playerGroundMoveVelocity.y = Mathf.Clamp(playerGroundMoveVelocity.y, -PLAYER_MAX_SPEED / Mathf.Sqrt(2), PLAYER_MAX_SPEED / Mathf.Sqrt(2));
@@ -80,7 +85,7 @@ public class NewMonoBehaviourScript : MonoBehaviour
         {
             playerGroundMoveVelocity.x = Mathf.MoveTowards(playerGroundMoveVelocity.x, 0, playerGroundMoveDecceleration * Time.deltaTime);
         }
-        if (moveDirection.y == 0)
+        if (moveDirection.z == 0)
         {
             playerGroundMoveVelocity.y = Mathf.MoveTowards(playerGroundMoveVelocity.y, 0, playerGroundMoveDecceleration * Time.deltaTime);
         }
@@ -110,27 +115,5 @@ public class NewMonoBehaviourScript : MonoBehaviour
             return groundCheck.distance < .3f;
         }
         return false;
-    }
-
-    private void PlayerMovementRotation(Vector2 movementInput)
-    {
-        var directionMap = new Dictionary<(float, float), float>
-        {
-            { (0, 1), 0 },   // North
-            { (.707107f, .707107f), 45 },   // North East
-            { (1, 0), 90 },   // East
-            { (.707107f, -.707107f), 135 },  // South East
-            { (0, -1), 180 },  // South
-            { (-.707107f, -.707107f), 225 }, // South West
-            { (-1, 0), 270 },  // West
-            { (-.707107f, .707107f), 315 }   // North West
-        };
-        float direction;
-
-        if (directionMap.TryGetValue((movementInput.x, movementInput.y),out direction))
-        {
-            playerDirection = Quaternion.Euler(0, direction, 0);
-        }
-        
     }
 }
