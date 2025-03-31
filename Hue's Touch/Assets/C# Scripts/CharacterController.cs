@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -14,13 +15,22 @@ public class NewMonoBehaviourScript : MonoBehaviour
     [Header("Grounded Movement Components")]
     private Vector2 playerGroundMoveVelocity; // the directional velocity that the player travels in
 
+    [Header("Aerial Movement Variables")]
+    [SerializeField] private float playerJumpSpeed;
+    private float playerJumpVelocity;
+    [SerializeField] private float playerJumpAcceleration;
+    [SerializeField] private float playerJumpDecceleration;
+    [SerializeField] private float MAX_JUMP_HEIGHT;
+
+    [Header("Aerial Movement Components")]
+    [SerializeField] private InputActionReference playerJump;
+
     [Header("Other Variables")]
     [SerializeField] private float playerMass; // the mass of the player
     private float gravity; // the gravity force value
     [SerializeField] private float rotationSpeed;
 
     [Header("Other Components")]
-    private Quaternion playerDirection; // the rotational value of the character model in respect to its forward facing vector
     [SerializeField] private Transform feetPosition; // the position where the floor checks raycasts  
     [SerializeField] private Rigidbody rb; // the kinematic rigidbody that holds all the physics components
     [SerializeField] private InputActionReference playerMovement; // the user input references from unity's new input system
@@ -54,17 +64,36 @@ public class NewMonoBehaviourScript : MonoBehaviour
         cameraRight.Normalize();
         moveDirection = cameraFoward * inputDirection.z + cameraRight * inputDirection.x; // moveDirections vector2 values are read from the playerMovement input map
 
+        if (IsGrounded())
+        {
+            gravity = 0;
+        }
+        else
+        {
+            gravity = -9.8f;
+        }
     }
 
     private void FixedUpdate()
     {
+        Debug.Log(gravity + ", " + groundCheck.distance);
+
+        if (playerJump.action.ReadValue<float>() > 0) 
+        {
+            playerJumpVelocity = Mathf.Clamp(playerJumpSpeed * playerJumpAcceleration, 0, MAX_JUMP_HEIGHT);
+            Debug.Log(playerJumpSpeed);
+        }
+        if (playerJump.action.ReadValue<float>() == 0 && !IsGrounded())
+        {
+            playerJumpVelocity = Mathf.Clamp(playerJumpSpeed * playerJumpDecceleration, 0, MAX_JUMP_HEIGHT);
+        }
 
         if (moveDirection.z != 0 || moveDirection.x != 0) // if either of the move inputs are pressed (vertical or horizontal)
         {
             Quaternion playerRotation = Quaternion.LookRotation(moveDirection);
             rb.MoveRotation(Quaternion.Slerp(rb.rotation, playerRotation, rotationSpeed * Time.deltaTime));
 
-            playerGroundMoveVelocity.x += playerGroundMoveAcceleration * Time.deltaTime * moveDirection.x; 
+            playerGroundMoveVelocity.x += playerGroundMoveAcceleration * Time.deltaTime * moveDirection.x;
             playerGroundMoveVelocity.y += playerGroundMoveAcceleration * Time.deltaTime * moveDirection.z;
             // ^ updates the velocity in respects to acceleration, time and direction for the y and x axis
 
@@ -90,29 +119,46 @@ public class NewMonoBehaviourScript : MonoBehaviour
             playerGroundMoveVelocity.y = Mathf.MoveTowards(playerGroundMoveVelocity.y, 0, playerGroundMoveDecceleration * Time.deltaTime);
         }
 
-
         rb.MovePosition(new Vector3(transform.position.x + playerGroundMoveVelocity.x,
-                                    transform.position.y + (gravity * Time.fixedDeltaTime),
+                                    transform.position.y + playerJumpVelocity + gravity * Time.deltaTime,
                                     transform.position.z + playerGroundMoveVelocity.y));
-
-        if (IsGrounded())
-        {
-            gravity = 0;
-        }
-        else
-        {
-            gravity = -9.8f;
-        }
 
         Debug.DrawRay(transform.position, transform.TransformDirection(Vector3.forward), Color.yellow);
     }
 
+    private void OnDrawGizmos()
+    {
+        Vector3 start = feetPosition.position + Vector3.up * .5f;
+        Vector3 end = feetPosition.position + Vector3.up * 1.5f;
+        float radius = .5f;
+        Vector3 direction = transform.TransformDirection(Vector3.down);
+        float maxDistance = 10f;
+
+        Gizmos.color = Color.yellow;
+
+        Gizmos.DrawWireSphere(start, radius);
+        Gizmos.DrawWireSphere(end, radius);
+
+        Gizmos.DrawLine(start, start + direction * maxDistance);
+        Gizmos.DrawLine(end, end + direction * maxDistance);
+
+        Vector3 finalStart = start + direction * maxDistance;
+        Vector3 finalEnd = end + direction * maxDistance;
+        Gizmos.color = Color.red;
+        Gizmos.DrawWireSphere(finalStart, radius);
+        Gizmos.DrawWireSphere(finalEnd, radius);
+    }
+
     private bool IsGrounded()
     {
-        if (Physics.Raycast(feetPosition.position, transform.TransformDirection(Vector3.down), out groundCheck, Mathf.Infinity))
+        Vector3 start = feetPosition.position + Vector3.up * .5f;
+        Vector3 end = feetPosition.position + Vector3.up * 1.5f;
+        float radius = .5f;
+        Vector3 direction = transform.TransformDirection(Vector3.down);
+        float maxDistance = .2f;
+        if (Physics.CapsuleCast(start, end, radius, direction, out groundCheck, maxDistance))
         {
-            Debug.DrawRay(feetPosition.position, transform.TransformDirection(Vector3.down * groundCheck.distance), Color.green);
-            return groundCheck.distance < .3f;
+            return groundCheck.distance < maxDistance;
         }
         return false;
     }
