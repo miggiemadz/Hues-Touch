@@ -124,7 +124,8 @@ public class Enemyai2 : MonoBehaviour
         }
     }
 
-    private void MeleeAttack() {        
+    private void MeleeAttack()
+    {
         Debug.Log("Enemy performed melee attack!");
         Health playerScript = player.GetComponent<Health>();
         if (playerScript != null)
