@@ -264,6 +264,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 583105037723206302, guid: f623c3614d0774146adc25bc7283c59e, type: 3}
+      propertyPath: Provoked
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 2684865861644472459, guid: f623c3614d0774146adc25bc7283c59e, type: 3}
       propertyPath: m_Name
       value: Enemy
@@ -282,7 +286,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8611131287105826632, guid: f623c3614d0774146adc25bc7283c59e, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -2.2851038
+      value: 2.62
       objectReference: {fileID: 0}
     - target: {fileID: 8611131287105826632, guid: f623c3614d0774146adc25bc7283c59e, type: 3}
       propertyPath: m_LocalRotation.w
@@ -315,10 +319,7 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 2684865861644472459, guid: f623c3614d0774146adc25bc7283c59e, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 1588968982}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: f623c3614d0774146adc25bc7283c59e, type: 3}
 --- !u!1 &675793608
 GameObject:
@@ -1954,26 +1955,6 @@ Mesh:
     offset: 0
     size: 0
     path: 
---- !u!1 &1588968973 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 2684865861644472459, guid: f623c3614d0774146adc25bc7283c59e, type: 3}
-  m_PrefabInstance: {fileID: 652672243}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &1588968982
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1588968973}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 63c9207349ff8534f8d9afa3a7e3ed0f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  maxHealth: 100
-  currentHealth: 0
-  healthFill: {fileID: 0}
 --- !u!1001 &5760083556063216526
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1992,7 +1973,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1364543090083470997, guid: 73953690641359141b5840864452e61d, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -11.9
+      value: -10.01
       objectReference: {fileID: 0}
     - target: {fileID: 1364543090083470997, guid: 73953690641359141b5840864452e61d, type: 3}
       propertyPath: m_LocalRotation.w
