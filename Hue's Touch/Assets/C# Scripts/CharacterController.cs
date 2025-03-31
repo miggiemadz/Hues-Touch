@@ -26,6 +26,10 @@ public class NewMonoBehaviourScript : MonoBehaviour
     private RaycastHit groundCheck; // the raycast hit reference that checks for floor collisions
     private Vector2 moveDirection; // the movement vector that gets it's values based on user input
 
+    [Header("Combat Settings")] // --steven
+    [SerializeField] private GameObject projectilePrefab;
+    [SerializeField] private Transform shootPoint; // where the projectile spawns from
+
     private void Awake()
     {
         rb = gameObject.GetComponent<Rigidbody>();
@@ -45,6 +49,9 @@ public class NewMonoBehaviourScript : MonoBehaviour
         moveDirection = playerMovement.action.ReadValue<Vector2>(); // moveDirections vector2 values are read from the playerMovement input map
         transform.rotation = Quaternion.Slerp(transform.rotation, playerDirection, playerRotateSpeed * Time.deltaTime);
         // ^ the characters rotations is a Quaternion slerp that starts at its current rotation and interpolates to a new rotation whenever the playerDirection is updated
+        if (Keyboard.current.eKey.wasPressedThisFrame) { // sorry to put this here but i might as well -- steven
+        ShootProjectile();}
+
     }
 
     private void FixedUpdate()
@@ -126,4 +133,26 @@ public class NewMonoBehaviourScript : MonoBehaviour
         }
         
     }
+ 
+    private void ShootProjectile() { // -- steven
+    if (projectilePrefab == null) {
+        Debug.LogError("No projectile prefab assigned!");
+        return;
+    }
+
+    // Determine spawn position and direction
+    Vector3 spawnPos = transform.position + transform.forward; // or use shootPoint.position if you have one
+    Vector3 shootDirection = transform.forward;
+
+    // Instantiate and launch
+    GameObject proj = Instantiate(projectilePrefab, spawnPos, Quaternion.identity);
+    Projectile projScript = proj.GetComponent<Projectile>();
+
+    if (projScript != null) {
+        projScript.SetDirection(shootDirection);
+    } else {
+        Debug.LogError("Projectile script is missing on the instantiated projectile!");}
+    }    
 }
+
+
