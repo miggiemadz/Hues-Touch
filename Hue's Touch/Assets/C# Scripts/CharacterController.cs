@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -14,17 +15,28 @@ public class NewMonoBehaviourScript : MonoBehaviour
     [Header("Grounded Movement Components")]
     private Vector2 playerGroundMoveVelocity; // the directional velocity that the player travels in
 
+    [Header("Aerial Movement Variables")]
+    [SerializeField] private float playerJumpSpeed;
+    private float playerJumpVelocity;
+    [SerializeField] private float playerJumpAcceleration;
+    [SerializeField] private float playerJumpDecceleration;
+    [SerializeField] private float MAX_JUMP_HEIGHT;
+
+    [Header("Aerial Movement Components")]
+    [SerializeField] private InputActionReference playerJump;
+
     [Header("Other Variables")]
     [SerializeField] private float playerMass; // the mass of the player
     private float gravity; // the gravity force value
+    [SerializeField] private float rotationSpeed;
 
     [Header("Other Components")]
-    private Quaternion playerDirection; // the rotational value of the character model in respect to its forward facing vector
     [SerializeField] private Transform feetPosition; // the position where the floor checks raycasts  
     [SerializeField] private Rigidbody rb; // the kinematic rigidbody that holds all the physics components
     [SerializeField] private InputActionReference playerMovement; // the user input references from unity's new input system
     private RaycastHit groundCheck; // the raycast hit reference that checks for floor collisions
-    private Vector2 moveDirection; // the movement vector that gets it's values based on user input
+    private Vector3 moveDirection; // the movement vector that gets it's values based on user input
+    [SerializeField] private Transform camera;
 
     [Header("Combat Settings")] // --steven
     [SerializeField] private GameObject projectilePrefab;
@@ -35,6 +47,7 @@ public class NewMonoBehaviourScript : MonoBehaviour
         rb = gameObject.GetComponent<Rigidbody>();
         gravity = -9.8f * playerMass;
         feetPosition = transform.GetChild(0).GetComponent<Transform>();
+        camera = transform.GetChild(2).gameObject.transform;
     }
 
     void Start()
@@ -44,26 +57,57 @@ public class NewMonoBehaviourScript : MonoBehaviour
 
     void Update()
     {
-        PlayerMovementRotation(moveDirection); // takes the moveDirection and updates the playerDirection
+        Vector3 inputDirection = new Vector3(playerMovement.action.ReadValue<Vector2>().x, 0, playerMovement.action.ReadValue<Vector2>().y).normalized;
+
+        Vector3 cameraFoward = camera.transform.forward;
+        cameraFoward.y = 0;
+        cameraFoward.Normalize();
+
+        Vector3 cameraRight = camera.transform.right;
+        cameraRight.y = 0;
+        cameraRight.Normalize();
+        moveDirection = cameraFoward * inputDirection.z + cameraRight * inputDirection.x; // moveDirections vector2 values are read from the playerMovement input map
+
+        if (IsGrounded())
+        {
+            gravity = 0;
+        }
+        else
+        {
+            gravity = -9.8f;
+        }
 
         moveDirection = playerMovement.action.ReadValue<Vector2>(); // moveDirections vector2 values are read from the playerMovement input map
         transform.rotation = Quaternion.Slerp(transform.rotation, playerDirection, playerRotateSpeed * Time.deltaTime);
         // ^ the characters rotations is a Quaternion slerp that starts at its current rotation and interpolates to a new rotation whenever the playerDirection is updated
         if (Keyboard.current.eKey.wasPressedThisFrame) { // sorry to put this here but i might as well -- steven
         ShootProjectile();}
-
     }
 
     private void FixedUpdate()
     {
+        Debug.Log(gravity + ", " + groundCheck.distance);
 
-        if (moveDirection.y != 0 || moveDirection.x != 0) // if either of the move inputs are pressed (vertical or horizontal)
+        if (playerJump.action.ReadValue<float>() > 0) 
         {
-            playerGroundMoveVelocity.x += playerGroundMoveAcceleration * Time.deltaTime * moveDirection.x; 
-            playerGroundMoveVelocity.y += playerGroundMoveAcceleration * Time.deltaTime * moveDirection.y;
+            playerJumpVelocity = Mathf.Clamp(playerJumpSpeed * playerJumpAcceleration, 0, MAX_JUMP_HEIGHT);
+            Debug.Log(playerJumpSpeed);
+        }
+        if (playerJump.action.ReadValue<float>() == 0 && !IsGrounded())
+        {
+            playerJumpVelocity = Mathf.Clamp(playerJumpSpeed * playerJumpDecceleration, 0, MAX_JUMP_HEIGHT);
+        }
+
+        if (moveDirection.z != 0 || moveDirection.x != 0) // if either of the move inputs are pressed (vertical or horizontal)
+        {
+            Quaternion playerRotation = Quaternion.LookRotation(moveDirection);
+            rb.MoveRotation(Quaternion.Slerp(rb.rotation, playerRotation, rotationSpeed * Time.deltaTime));
+
+            playerGroundMoveVelocity.x += playerGroundMoveAcceleration * Time.deltaTime * moveDirection.x;
+            playerGroundMoveVelocity.y += playerGroundMoveAcceleration * Time.deltaTime * moveDirection.z;
             // ^ updates the velocity in respects to acceleration, time and direction for the y and x axis
 
-            if (moveDirection.y != 0 && moveDirection.x != 0) // if both move inputs are pressed (vertical and horizontal)
+            if (moveDirection.z != 0 && moveDirection.x != 0) // if both move inputs are pressed (vertical and horizontal)
             {
                 playerGroundMoveVelocity.x = Mathf.Clamp(playerGroundMoveVelocity.x, -PLAYER_MAX_SPEED / Mathf.Sqrt(2), PLAYER_MAX_SPEED / Mathf.Sqrt(2));
                 playerGroundMoveVelocity.y = Mathf.Clamp(playerGroundMoveVelocity.y, -PLAYER_MAX_SPEED / Mathf.Sqrt(2), PLAYER_MAX_SPEED / Mathf.Sqrt(2));
@@ -80,58 +124,53 @@ public class NewMonoBehaviourScript : MonoBehaviour
         {
             playerGroundMoveVelocity.x = Mathf.MoveTowards(playerGroundMoveVelocity.x, 0, playerGroundMoveDecceleration * Time.deltaTime);
         }
-        if (moveDirection.y == 0)
+        if (moveDirection.z == 0)
         {
             playerGroundMoveVelocity.y = Mathf.MoveTowards(playerGroundMoveVelocity.y, 0, playerGroundMoveDecceleration * Time.deltaTime);
         }
 
-
         rb.MovePosition(new Vector3(transform.position.x + playerGroundMoveVelocity.x,
-                                    transform.position.y + (gravity * Time.fixedDeltaTime),
+                                    transform.position.y + playerJumpVelocity + gravity * Time.deltaTime,
                                     transform.position.z + playerGroundMoveVelocity.y));
-
-        if (IsGrounded())
-        {
-            gravity = 0;
-        }
-        else
-        {
-            gravity = -9.8f;
-        }
 
         Debug.DrawRay(transform.position, transform.TransformDirection(Vector3.forward), Color.yellow);
     }
 
-    private bool IsGrounded()
+    private void OnDrawGizmos()
     {
-        if (Physics.Raycast(feetPosition.position, transform.TransformDirection(Vector3.down), out groundCheck, Mathf.Infinity))
-        {
-            Debug.DrawRay(feetPosition.position, transform.TransformDirection(Vector3.down * groundCheck.distance), Color.green);
-            return groundCheck.distance < .3f;
-        }
-        return false;
+        Vector3 start = feetPosition.position + Vector3.up * .5f;
+        Vector3 end = feetPosition.position + Vector3.up * 1.5f;
+        float radius = .5f;
+        Vector3 direction = transform.TransformDirection(Vector3.down);
+        float maxDistance = 10f;
+
+        Gizmos.color = Color.yellow;
+
+        Gizmos.DrawWireSphere(start, radius);
+        Gizmos.DrawWireSphere(end, radius);
+
+        Gizmos.DrawLine(start, start + direction * maxDistance);
+        Gizmos.DrawLine(end, end + direction * maxDistance);
+
+        Vector3 finalStart = start + direction * maxDistance;
+        Vector3 finalEnd = end + direction * maxDistance;
+        Gizmos.color = Color.red;
+        Gizmos.DrawWireSphere(finalStart, radius);
+        Gizmos.DrawWireSphere(finalEnd, radius);
     }
 
-    private void PlayerMovementRotation(Vector2 movementInput)
+    private bool IsGrounded()
     {
-        var directionMap = new Dictionary<(float, float), float>
+        Vector3 start = feetPosition.position + Vector3.up * .5f;
+        Vector3 end = feetPosition.position + Vector3.up * 1.5f;
+        float radius = .5f;
+        Vector3 direction = transform.TransformDirection(Vector3.down);
+        float maxDistance = .2f;
+        if (Physics.CapsuleCast(start, end, radius, direction, out groundCheck, maxDistance))
         {
-            { (0, 1), 0 },   // North
-            { (.707107f, .707107f), 45 },   // North East
-            { (1, 0), 90 },   // East
-            { (.707107f, -.707107f), 135 },  // South East
-            { (0, -1), 180 },  // South
-            { (-.707107f, -.707107f), 225 }, // South West
-            { (-1, 0), 270 },  // West
-            { (-.707107f, .707107f), 315 }   // North West
-        };
-        float direction;
-
-        if (directionMap.TryGetValue((movementInput.x, movementInput.y),out direction))
-        {
-            playerDirection = Quaternion.Euler(0, direction, 0);
+            return groundCheck.distance < maxDistance;
         }
-        
+        return false;
     }
  
     private void ShootProjectile() { // -- steven
