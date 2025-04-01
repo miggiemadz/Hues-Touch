@@ -35,8 +35,12 @@ public class NewMonoBehaviourScript : MonoBehaviour
     [SerializeField] private Rigidbody rb; // the kinematic rigidbody that holds all the physics components
     [SerializeField] private InputActionReference playerMovement; // the user input references from unity's new input system
     private RaycastHit groundCheck; // the raycast hit reference that checks for floor collisions
+    private RaycastHit collisionCheck;
     private Vector3 moveDirection; // the movement vector that gets it's values based on user input
     [SerializeField] private Transform camera;
+    [SerializeField] private CapsuleCollider characterCollider;
+    private Vector3 inputDirection;
+    private float distanceToCollider;
 
     [Header("Combat Settings")] // --steven
     [SerializeField] private GameObject projectilePrefab;
@@ -49,7 +53,6 @@ public class NewMonoBehaviourScript : MonoBehaviour
         feetPosition = transform.GetChild(0).GetComponent<Transform>();
         camera = transform.GetChild(2).gameObject.transform;
     }
-
     void Start()
     {
         
@@ -57,7 +60,9 @@ public class NewMonoBehaviourScript : MonoBehaviour
 
     void Update()
     {
-        Vector3 inputDirection = new Vector3(playerMovement.action.ReadValue<Vector2>().x, 0, playerMovement.action.ReadValue<Vector2>().y).normalized;
+        inputDirection = new Vector3(playerMovement.action.ReadValue<Vector2>().x, 0, playerMovement.action.ReadValue<Vector2>().y).normalized;
+
+        distanceToCollider = Mathf.Clamp(CollisionHandler(), 0, 2);
 
         Vector3 cameraFoward = camera.transform.forward;
         cameraFoward.y = 0;
@@ -84,8 +89,6 @@ public class NewMonoBehaviourScript : MonoBehaviour
 
     private void FixedUpdate()
     {
-        Debug.Log(gravity + ", " + groundCheck.distance);
-
         if (playerJump.action.ReadValue<float>() > 0) 
         {
             playerJumpVelocity = Mathf.Clamp(playerJumpSpeed * playerJumpAcceleration, 0, MAX_JUMP_HEIGHT);
@@ -127,6 +130,11 @@ public class NewMonoBehaviourScript : MonoBehaviour
             playerGroundMoveVelocity.y = Mathf.MoveTowards(playerGroundMoveVelocity.y, 0, playerGroundMoveDecceleration * Time.deltaTime);
         }
 
+        if (distanceToCollider < .2f)
+        {
+            playerGroundMoveVelocity = Vector2.zero;
+        }
+
         rb.MovePosition(new Vector3(transform.position.x + playerGroundMoveVelocity.x,
                                     transform.position.y + playerJumpVelocity + gravity * Time.deltaTime,
                                     transform.position.z + playerGroundMoveVelocity.y));
@@ -136,11 +144,31 @@ public class NewMonoBehaviourScript : MonoBehaviour
 
     private void OnDrawGizmos()
     {
+        Vector3 groundStart = feetPosition.position + Vector3.up * .5f;
+        Vector3 groundEnd = feetPosition.position + Vector3.up * 1.5f;
+        float groundRadius = .5f;
+        Vector3 groundDirection = transform.TransformDirection(Vector3.down);
+        float groundMaxDistance = .3f;
+
+        Gizmos.color = Color.yellow;
+
+        Gizmos.DrawWireSphere(groundStart, groundRadius);
+        Gizmos.DrawWireSphere(groundEnd, groundRadius);
+
+        Gizmos.DrawLine(groundStart, groundStart + groundDirection * groundMaxDistance);
+        Gizmos.DrawLine(groundEnd, groundEnd + groundDirection * groundMaxDistance);
+
+        Vector3 groundFinalStart = groundStart + groundDirection * groundMaxDistance;
+        Vector3 groundFinalEnd = groundEnd + groundDirection * groundMaxDistance;
+        Gizmos.color = Color.red;
+        Gizmos.DrawWireSphere(groundFinalStart, groundRadius);
+        Gizmos.DrawWireSphere(groundFinalEnd, groundRadius);
+
         Vector3 start = feetPosition.position + Vector3.up * .5f;
         Vector3 end = feetPosition.position + Vector3.up * 1.5f;
         float radius = .5f;
-        Vector3 direction = transform.TransformDirection(Vector3.down);
-        float maxDistance = 10f;
+        Vector3 direction = inputDirection;
+        float maxDistance = .3f;
 
         Gizmos.color = Color.yellow;
 
@@ -150,11 +178,11 @@ public class NewMonoBehaviourScript : MonoBehaviour
         Gizmos.DrawLine(start, start + direction * maxDistance);
         Gizmos.DrawLine(end, end + direction * maxDistance);
 
-        Vector3 finalStart = start + direction * maxDistance;
-        Vector3 finalEnd = end + direction * maxDistance;
+        Vector3 collisionFinalStart = start + direction * maxDistance;
+        Vector3 collisionFinalEnd = end + direction * maxDistance;
         Gizmos.color = Color.red;
-        Gizmos.DrawWireSphere(finalStart, radius);
-        Gizmos.DrawWireSphere(finalEnd, radius);
+        Gizmos.DrawWireSphere(collisionFinalStart, radius);
+        Gizmos.DrawWireSphere(collisionFinalEnd, radius);
     }
 
     private bool IsGrounded()
@@ -163,14 +191,41 @@ public class NewMonoBehaviourScript : MonoBehaviour
         Vector3 end = feetPosition.position + Vector3.up * 1.5f;
         float radius = .5f;
         Vector3 direction = transform.TransformDirection(Vector3.down);
-        float maxDistance = .2f;
+        float maxDistance = 2f;
+
         if (Physics.CapsuleCast(start, end, radius, direction, out groundCheck, maxDistance))
         {
-            return groundCheck.distance < maxDistance;
+            return Mathf.Clamp(groundCheck.distance,0,1) < .2f;
         }
+
         return false;
     }
- 
+
+    private float CollisionHandler()
+    {
+        Vector3 start = feetPosition.position + Vector3.up * .5f;
+        Vector3 end = feetPosition.position + Vector3.up * 1.5f;
+        float radius = .5f;
+        Vector3 direction = moveDirection;
+        float maxDistance = 2f;
+
+        if (Physics.CapsuleCast(start, end, radius, direction, out collisionCheck, maxDistance, 3))
+        {
+            return collisionCheck.distance;
+        }
+
+        if (Physics.CapsuleCast(start, end, radius, direction + Vector3.right, out collisionCheck, maxDistance, 3))
+        {
+            return collisionCheck.distance;
+        }
+
+        if (Physics.CapsuleCast(start, end, radius, direction + Vector3.right * -1, out collisionCheck, maxDistance, 3))
+        {
+            return collisionCheck.distance;
+        }
+        return 2;
+    }
+
     private void ShootProjectile() { // -- steven
     if (projectilePrefab == null) {
         Debug.LogError("No projectile prefab assigned!");
