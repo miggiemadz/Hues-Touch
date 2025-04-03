@@ -1,7 +1,5 @@
 {
   "dependencies": {
-<<<<<<< HEAD
-=======
     "com.unity.ai.navigation": {
       "version": "2.0.5",
       "depth": 0,
@@ -91,7 +89,6 @@
       "dependencies": {},
       "url": "https://packages.unity.com"
     },
->>>>>>> parent of bdfc5f1d (Delete Hue's Touch directory)
     "com.unity.multiplayer.center": {
       "version": "1.0.0",
       "depth": 0,
@@ -100,8 +97,6 @@
         "com.unity.modules.uielements": "1.0.0"
       }
     },
-<<<<<<< HEAD
-=======
     "com.unity.nuget.mono-cecil": {
       "version": "1.11.4",
       "depth": 3,
@@ -249,7 +244,6 @@
       },
       "url": "https://packages.unity.com"
     },
->>>>>>> parent of bdfc5f1d (Delete Hue's Touch directory)
     "com.unity.modules.accessibility": {
       "version": "1.0.0",
       "depth": 0,
