@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using Unity.Cinemachine;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -21,26 +22,34 @@ public class NewMonoBehaviourScript : MonoBehaviour
     [SerializeField] private float playerJumpAcceleration;
     [SerializeField] private float playerJumpDecceleration;
     [SerializeField] private float MAX_JUMP_HEIGHT;
+    private float gravity; // the gravity force value
+
 
     [Header("Aerial Movement Components")]
     [SerializeField] private InputActionReference playerJump;
 
     [Header("Other Variables")]
     [SerializeField] private float playerMass; // the mass of the player
-    private float gravity; // the gravity force value
     [SerializeField] private float rotationSpeed;
+    private Vector3 inputDirection;
+    private Vector3 moveDirection; // the movement vector that gets it's values based on user input
 
     [Header("Other Components")]
     [SerializeField] private Transform feetPosition; // the position where the floor checks raycasts  
     [SerializeField] private Rigidbody rb; // the kinematic rigidbody that holds all the physics components
     [SerializeField] private InputActionReference playerMovement; // the user input references from unity's new input system
+
+    [Header("Camera Components")]
+    [SerializeField] private Transform cameraTransform;
+    [SerializeField] private Transform cameraReferenceRoot;
+    [SerializeField] private CinemachineCamera playerCamera;
+
+    [Header("Collision Components")]
+    [SerializeField] private CapsuleCollider characterCollider;
+    private float distanceToCollider;
     private RaycastHit groundCheck; // the raycast hit reference that checks for floor collisions
     private RaycastHit collisionCheck;
-    private Vector3 moveDirection; // the movement vector that gets it's values based on user input
-    [SerializeField] private Transform camera;
-    [SerializeField] private CapsuleCollider characterCollider;
-    private Vector3 inputDirection;
-    private float distanceToCollider;
+    private RaycastHit wallCheck;
 
     [Header("Combat Settings")] // --steven
     [SerializeField] private GameObject projectilePrefab;
@@ -51,7 +60,7 @@ public class NewMonoBehaviourScript : MonoBehaviour
         rb = gameObject.GetComponent<Rigidbody>();
         gravity = -9.8f * playerMass;
         feetPosition = transform.GetChild(0).GetComponent<Transform>();
-        camera = transform.GetChild(2).gameObject.transform;
+        cameraReferenceRoot = transform.GetChild(3).gameObject.transform;
     }
     void Start()
     {
@@ -61,17 +70,19 @@ public class NewMonoBehaviourScript : MonoBehaviour
     void Update()
     {
         inputDirection = new Vector3(playerMovement.action.ReadValue<Vector2>().x, 0, playerMovement.action.ReadValue<Vector2>().y).normalized;
-
+        
         distanceToCollider = Mathf.Clamp(CollisionHandler(), 0, 2);
 
-        Vector3 cameraFoward = camera.transform.forward;
-        cameraFoward.y = 0;
-        cameraFoward.Normalize();
+        Vector3 cameraDiff = playerCamera.Follow.position - cameraTransform.position;
+        cameraDiff.y = 0;
+        cameraDiff.Normalize();
+        cameraReferenceRoot.forward = cameraDiff;
 
-        Vector3 cameraRight = camera.transform.right;
-        cameraRight.y = 0;
-        cameraRight.Normalize();
-        moveDirection = cameraFoward * inputDirection.z + cameraRight * inputDirection.x; // moveDirections vector2 values are read from the playerMovement input map
+        Vector3 flatForward = cameraReferenceRoot.forward;
+        Vector3 flatRight = cameraReferenceRoot.right;
+
+        moveDirection = flatForward * inputDirection.z + flatRight * inputDirection.x; // moveDirections vector2 values are read from the playerMovement input map
+        Debug.Log(moveDirection + " | " + playerGroundMoveVelocity);
 
         if (IsGrounded())
         {
@@ -121,11 +132,11 @@ public class NewMonoBehaviourScript : MonoBehaviour
                 // ^ sets the max speed to 15 or -15 depending on direction and prevents the velocity from exceeding
             }
         }
-        if (moveDirection.x == 0)
+        if (moveDirection.x < .1f && moveDirection.x > -.1f)
         {
             playerGroundMoveVelocity.x = Mathf.MoveTowards(playerGroundMoveVelocity.x, 0, playerGroundMoveDecceleration * Time.deltaTime);
         }
-        if (moveDirection.z == 0)
+        if (moveDirection.z < .1f && moveDirection.z > -.1f)
         {
             playerGroundMoveVelocity.y = Mathf.MoveTowards(playerGroundMoveVelocity.y, 0, playerGroundMoveDecceleration * Time.deltaTime);
         }
@@ -144,45 +155,25 @@ public class NewMonoBehaviourScript : MonoBehaviour
 
     private void OnDrawGizmos()
     {
-        Vector3 groundStart = feetPosition.position + Vector3.up * .5f;
-        Vector3 groundEnd = feetPosition.position + Vector3.up * 1.5f;
-        float groundRadius = .5f;
-        Vector3 groundDirection = transform.TransformDirection(Vector3.down);
-        float groundMaxDistance = .3f;
+        Vector3 collisionStart = feetPosition.position + Vector3.up * .5f;
+        Vector3 collisionEnd = feetPosition.position + Vector3.up * 1.5f;
+        float collisionRadius = .5f;
+        Vector3 collisionDirection = inputDirection;
+        float collisionMaxDistance = .3f;
 
         Gizmos.color = Color.yellow;
 
-        Gizmos.DrawWireSphere(groundStart, groundRadius);
-        Gizmos.DrawWireSphere(groundEnd, groundRadius);
+        Gizmos.DrawWireSphere(collisionStart, collisionRadius);
+        Gizmos.DrawWireSphere(collisionEnd, collisionRadius);
 
-        Gizmos.DrawLine(groundStart, groundStart + groundDirection * groundMaxDistance);
-        Gizmos.DrawLine(groundEnd, groundEnd + groundDirection * groundMaxDistance);
+        Gizmos.DrawLine(collisionStart, collisionStart + collisionDirection * collisionMaxDistance);
+        Gizmos.DrawLine(collisionEnd, collisionEnd + collisionDirection * collisionMaxDistance);
 
-        Vector3 groundFinalStart = groundStart + groundDirection * groundMaxDistance;
-        Vector3 groundFinalEnd = groundEnd + groundDirection * groundMaxDistance;
+        Vector3 collisionFinalStart = collisionStart + collisionDirection * collisionMaxDistance;
+        Vector3 collisionFinalEnd = collisionEnd + collisionDirection * collisionMaxDistance;
         Gizmos.color = Color.red;
-        Gizmos.DrawWireSphere(groundFinalStart, groundRadius);
-        Gizmos.DrawWireSphere(groundFinalEnd, groundRadius);
-
-        Vector3 start = feetPosition.position + Vector3.up * .5f;
-        Vector3 end = feetPosition.position + Vector3.up * 1.5f;
-        float radius = .5f;
-        Vector3 direction = inputDirection;
-        float maxDistance = .3f;
-
-        Gizmos.color = Color.yellow;
-
-        Gizmos.DrawWireSphere(start, radius);
-        Gizmos.DrawWireSphere(end, radius);
-
-        Gizmos.DrawLine(start, start + direction * maxDistance);
-        Gizmos.DrawLine(end, end + direction * maxDistance);
-
-        Vector3 collisionFinalStart = start + direction * maxDistance;
-        Vector3 collisionFinalEnd = end + direction * maxDistance;
-        Gizmos.color = Color.red;
-        Gizmos.DrawWireSphere(collisionFinalStart, radius);
-        Gizmos.DrawWireSphere(collisionFinalEnd, radius);
+        Gizmos.DrawWireSphere(collisionFinalStart, collisionRadius);
+        Gizmos.DrawWireSphere(collisionFinalEnd, collisionRadius);
     }
 
     private bool IsGrounded()
@@ -201,50 +192,76 @@ public class NewMonoBehaviourScript : MonoBehaviour
         return false;
     }
 
+    private bool WallChecker()
+    {
+        Vector3 start = feetPosition.position + Vector3.up * .5f;
+        Vector3 end = feetPosition.position + Vector3.up * 1.5f;
+        float radius = .5f;
+        Vector3 direction = moveDirection;
+        float maxDistance = .5f;
+
+        if (Physics.CapsuleCast(start, end, radius, direction + Vector3.right, out wallCheck, maxDistance, 3))
+        {
+            return Mathf.Clamp(wallCheck.distance, 0, 1) < .2f;
+        }
+        if (Physics.CapsuleCast(start, end, radius, direction - Vector3.right, out wallCheck,maxDistance, 3))
+        {
+            return Mathf.Clamp(wallCheck.distance, 0, 1) < .2f;
+        }
+
+        return false;
+    }
+
     private float CollisionHandler()
     {
         Vector3 start = feetPosition.position + Vector3.up * .5f;
         Vector3 end = feetPosition.position + Vector3.up * 1.5f;
         float radius = .5f;
         Vector3 direction = moveDirection;
-        float maxDistance = 2f;
+        float maxDistance = .5f;
 
         if (Physics.CapsuleCast(start, end, radius, direction, out collisionCheck, maxDistance, 3))
         {
             return collisionCheck.distance;
         }
-
-        if (Physics.CapsuleCast(start, end, radius, direction + Vector3.right, out collisionCheck, maxDistance, 3))
+        else
         {
-            return collisionCheck.distance;
-        }
+            Vector3 vectorRight = new Vector3(moveDirection.x * Mathf.Cos(20) + moveDirection.z * Mathf.Sin(20), 0, -moveDirection.x * Mathf.Sin(20) + moveDirection.z * Mathf.Cos(20));
+            Vector3 vectorLeft = new Vector3(moveDirection.x * Mathf.Cos(20) - moveDirection.z * Mathf.Sin(20), 0, moveDirection.x * Mathf.Sin(20) + moveDirection.z * Mathf.Cos(20));
 
-        if (Physics.CapsuleCast(start, end, radius, direction + Vector3.right * -1, out collisionCheck, maxDistance, 3))
-        {
-            return collisionCheck.distance;
+            if (!WallChecker())
+            if (Physics.CapsuleCast(start, end, radius, vectorLeft, out collisionCheck, maxDistance, 3))
+            {
+                return collisionCheck.distance;
+            }
+
+            if (Physics.CapsuleCast(start, end, radius, vectorRight, out collisionCheck, maxDistance, 3))
+            {
+                return collisionCheck.distance;
+            }
         }
         return 2;
     }
 
     private void ShootProjectile() { // -- steven
-    if (projectilePrefab == null) {
-        Debug.LogError("No projectile prefab assigned!");
-        return;
-    }
+        if (projectilePrefab == null) {
+            Debug.LogError("No projectile prefab assigned!");
+            return;
+        }
 
-    // Determine spawn position and direction
-    Vector3 spawnPos = transform.position + transform.forward; // or use shootPoint.position if you have one
-    Vector3 shootDirection = transform.forward;
+        // Determine spawn position and direction
+        Vector3 spawnPos = transform.position + transform.forward; // or use shootPoint.position if you have one
+        Vector3 shootDirection = transform.forward;
 
-    // Instantiate and launch
-    GameObject proj = Instantiate(projectilePrefab, spawnPos, Quaternion.identity);
-    Projectile projScript = proj.GetComponent<Projectile>();
+        // Instantiate and launch
+        GameObject proj = Instantiate(projectilePrefab, spawnPos, Quaternion.identity);
+        Projectile projScript = proj.GetComponent<Projectile>();
 
-    if (projScript != null) {
-        projScript.SetDirection(shootDirection);
-    } else {
-        Debug.LogError("Projectile script is missing on the instantiated projectile!");}
-    }    
+        if (projScript != null) {
+            projScript.SetDirection(shootDirection);
+        } else {
+            Debug.LogError("Projectile script is missing on the instantiated projectile!");}
+        }    
 }
 
 
