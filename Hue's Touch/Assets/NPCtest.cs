@@ -1,8 +1,9 @@
 using UnityEngine;
+using TMPro;
 
 public class NPCtest : MonoBehaviour
 {
-    //
+    [SerializeField] public TMP_Text textBox; //to reference text label ('Text TMP' in TextBox)
     bool playerDetection = false;
 
 
@@ -15,7 +16,8 @@ public class NPCtest : MonoBehaviour
             //print console statement
             print("Dialouge Started!");
 
-            //(TO DO: update UI or add speech bubble above player?)
+            //(TO DO: update UI)
+            textBox.text = "Hello!\n I'm Bob!";
         }
         
     }

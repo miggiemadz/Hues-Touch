@@ -42,6 +42,11 @@ public class NewMonoBehaviourScript : MonoBehaviour
     [SerializeField] private GameObject projectilePrefab;
     [SerializeField] private Transform shootPoint; // where the projectile spawns from
 
+    [Header("Health Variables")] // --sidney
+    public int maxHealth = 100;
+    public int currentHealth;
+    public healthScript healthBar;
+
     private void Awake()
     {
         rb = gameObject.GetComponent<Rigidbody>();
@@ -52,7 +57,8 @@ public class NewMonoBehaviourScript : MonoBehaviour
 
     void Start()
     {
-        
+        currentHealth = maxHealth; //set player health to 100 when game starts
+        healthBar.setMaxHealth(maxHealth); //set health on healthbar
     }
 
     void Update()
@@ -190,6 +196,20 @@ public class NewMonoBehaviourScript : MonoBehaviour
     } else {
         Debug.LogError("Projectile script is missing on the instantiated projectile!");}
     }    
+
+    //4 whenever damage is taken (for ex: takeDamage(20) can be called)
+    public void takeDamage(int damage){ // --sidney
+        currentHealth -= damage;
+        healthBar.setHealth(currentHealth);
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if(other.gameObject.name == "DamageDummy")
+        {
+            takeDamage(20);
+        }
+    }
 }
 
 
