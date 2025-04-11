@@ -23,6 +23,8 @@ public class NewMonoBehaviourScript : MonoBehaviour
     [SerializeField] private float playerJumpDecceleration;
     [SerializeField] private float MAX_JUMP_HEIGHT;
     private float gravity; // the gravity force value
+    private bool canJump;
+    private bool isFalling;
 
 
     [Header("Aerial Movement Components")]
@@ -82,33 +84,49 @@ public class NewMonoBehaviourScript : MonoBehaviour
         Vector3 flatRight = cameraReferenceRoot.right;
 
         moveDirection = flatForward * inputDirection.z + flatRight * inputDirection.x; // moveDirections vector2 values are read from the playerMovement input map
-        Debug.Log(moveDirection + " | " + playerGroundMoveVelocity);
 
-        if (!IsFloorClose())
-        {
-            gravity = 0;
-        }
-        else
+        if (!IsFloorClose() && !isGrounded())
         {
             gravity = -9.8f;
         }
+        if (!isGrounded() && IsFloorClose())
+        {
+            gravity = 0f;
+            playerJumpVelocity = 0f;
+            canJump = true;
+            isFalling = false;
+        }
+        if (!IsFloorClose() && isGrounded()) 
+        {
+            gravity = 9.8f;
+        }
 
-        // ^ the characters rotations is a Quaternion slerp that starts at its current rotation and interpolates to a new rotation whenever the playerDirection is updated
         if (Keyboard.current.eKey.wasPressedThisFrame) { // sorry to put this here but i might as well -- steven
         ShootProjectile();}
     }
 
     private void FixedUpdate()
     {
-        if (playerJump.action.ReadValue<float>() > 0) 
+        Debug.Log(playerJumpVelocity + ", " + canJump);
+
+        if (playerJumpVelocity > MAX_JUMP_HEIGHT)
         {
-            playerJumpVelocity = Mathf.Clamp(playerJumpSpeed * playerJumpAcceleration, 0, MAX_JUMP_HEIGHT);
-            Debug.Log(playerJumpSpeed);
+            canJump = false;
+            isFalling = true;
         }
-        if (playerJump.action.ReadValue<float>() == 0 && IsFloorClose())
+        if (playerJump.action.ReadValue<float>() == 0 && playerJumpVelocity > 0)
         {
-            playerJumpVelocity = Mathf.Clamp(playerJumpSpeed * playerJumpDecceleration, 0, MAX_JUMP_HEIGHT);
+            isFalling = true;
         }
+        if (playerJump.action.ReadValue<float>() > 0 && canJump)
+        {
+            playerJumpVelocity += playerJumpSpeed * playerJumpAcceleration;
+        }
+        if (!IsFloorClose() && playerJumpVelocity > 0 && isFalling)
+        {
+            playerJumpVelocity -= playerJumpSpeed * playerJumpDecceleration;
+        }
+
 
         if (moveDirection.z != 0 || moveDirection.x != 0) // if either of the move inputs are pressed (vertical or horizontal)
         {
@@ -151,6 +169,7 @@ public class NewMonoBehaviourScript : MonoBehaviour
                                     transform.position.z + playerGroundMoveVelocity.y));
 
         Debug.DrawRay(transform.position, transform.TransformDirection(Vector3.forward), Color.yellow);
+
     }
 
     private void OnDrawGizmos()
@@ -174,6 +193,18 @@ public class NewMonoBehaviourScript : MonoBehaviour
         Gizmos.color = Color.red;
         Gizmos.DrawWireSphere(collisionFinalStart, collisionRadius);
         Gizmos.DrawWireSphere(collisionFinalEnd, collisionRadius);
+
+        Vector3 start = feetPosition.position + Vector3.up * .5f;
+        Vector3 end = feetPosition.position + Vector3.up * 1.5f;
+        float radius = .5f;
+
+        Gizmos.color = Color.green;
+        Gizmos.DrawWireSphere(start, radius);
+        Gizmos.DrawWireSphere(end, radius);
+        Gizmos.DrawLine(start + Vector3.forward * radius, end + Vector3.forward * radius);
+        Gizmos.DrawLine(start - Vector3.forward * radius, end - Vector3.forward * radius);
+        Gizmos.DrawLine(start + Vector3.right * radius, end + Vector3.right * radius);
+        Gizmos.DrawLine(start - Vector3.right * radius, end - Vector3.right * radius);
     }
 
     private bool IsFloorClose()
@@ -184,12 +215,27 @@ public class NewMonoBehaviourScript : MonoBehaviour
         Vector3 direction = transform.TransformDirection(Vector3.down);
         float maxDistance = 2f;
 
-        if (Physics.CapsuleCast(start, end, radius, direction, out groundCheck, maxDistance))
+        int excludedLayers = LayerMask.GetMask("Player", "Walls");
+        int groundMask = ~excludedLayers;
+
+        if (Physics.CapsuleCast(start, end, radius, direction, out groundCheck, maxDistance, groundMask))
         {
-            return !(Mathf.Clamp(groundCheck.distance,0,1) < .2f);
+            return Mathf.Clamp(groundCheck.distance,0,1) < .2f;
         }
 
-        return true;
+        return false;
+    }
+
+    private bool isGrounded()
+    {
+        Vector3 start = feetPosition.position + Vector3.up * .5f;
+        Vector3 end = feetPosition.position + Vector3.up * 1.5f;
+        float radius = .5f;
+
+        int excludedLayers = LayerMask.GetMask("Player", "Walls");
+        int groundMask = ~excludedLayers;
+
+        return Physics.CheckCapsule(start, end, radius, groundMask);
     }
 
     private bool WallChecker()
@@ -202,11 +248,11 @@ public class NewMonoBehaviourScript : MonoBehaviour
 
         if (Physics.CapsuleCast(start, end, radius, direction + Vector3.right, out wallCheck, maxDistance, 3))
         {
-            return Mathf.Clamp(wallCheck.distance, 0, 1) < .2f;
+            return Mathf.Clamp(wallCheck.distance, 0, 1) < .1f;
         }
         if (Physics.CapsuleCast(start, end, radius, direction - Vector3.right, out wallCheck,maxDistance, 3))
         {
-            return Mathf.Clamp(wallCheck.distance, 0, 1) < .2f;
+            return Mathf.Clamp(wallCheck.distance, 0, 1) < .1f;
         }
 
         return false;
