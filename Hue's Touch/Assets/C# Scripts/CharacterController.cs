@@ -84,7 +84,7 @@ public class NewMonoBehaviourScript : MonoBehaviour
         moveDirection = flatForward * inputDirection.z + flatRight * inputDirection.x; // moveDirections vector2 values are read from the playerMovement input map
         Debug.Log(moveDirection + " | " + playerGroundMoveVelocity);
 
-        if (IsGrounded())
+        if (!IsFloorClose())
         {
             gravity = 0;
         }
@@ -105,7 +105,7 @@ public class NewMonoBehaviourScript : MonoBehaviour
             playerJumpVelocity = Mathf.Clamp(playerJumpSpeed * playerJumpAcceleration, 0, MAX_JUMP_HEIGHT);
             Debug.Log(playerJumpSpeed);
         }
-        if (playerJump.action.ReadValue<float>() == 0 && !IsGrounded())
+        if (playerJump.action.ReadValue<float>() == 0 && IsFloorClose())
         {
             playerJumpVelocity = Mathf.Clamp(playerJumpSpeed * playerJumpDecceleration, 0, MAX_JUMP_HEIGHT);
         }
@@ -176,7 +176,7 @@ public class NewMonoBehaviourScript : MonoBehaviour
         Gizmos.DrawWireSphere(collisionFinalEnd, collisionRadius);
     }
 
-    private bool IsGrounded()
+    private bool IsFloorClose()
     {
         Vector3 start = feetPosition.position + Vector3.up * .5f;
         Vector3 end = feetPosition.position + Vector3.up * 1.5f;
@@ -186,10 +186,10 @@ public class NewMonoBehaviourScript : MonoBehaviour
 
         if (Physics.CapsuleCast(start, end, radius, direction, out groundCheck, maxDistance))
         {
-            return Mathf.Clamp(groundCheck.distance,0,1) < .2f;
+            return !(Mathf.Clamp(groundCheck.distance,0,1) < .2f);
         }
 
-        return false;
+        return true;
     }
 
     private bool WallChecker()
