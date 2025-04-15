@@ -233,7 +233,7 @@ public class NewMonoBehaviourScript : MonoBehaviour
     }
 
     // Determine spawn position and direction
-    Vector3 spawnPos = transform.position + transform.forward; // or use shootPoint.position if you have one
+    Vector3 spawnPos = transform.position + transform.forward; 
     Vector3 shootDirection = transform.forward;
 
     // Instantiate and launch
@@ -246,5 +246,3 @@ public class NewMonoBehaviourScript : MonoBehaviour
         Debug.LogError("Projectile script is missing on the instantiated projectile!");}
     }    
 }
-
-
