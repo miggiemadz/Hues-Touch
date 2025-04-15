@@ -99,6 +99,7 @@ public class NewMonoBehaviourScript : MonoBehaviour
         if (!IsFloorClose() && isGrounded()) 
         {
             gravity = 9.8f;
+            playerJumpVelocity = 0f;
         }
 
         if (Keyboard.current.eKey.wasPressedThisFrame) { // sorry to put this here but i might as well -- steven
