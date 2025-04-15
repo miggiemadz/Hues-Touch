@@ -5,7 +5,7 @@ using UnityEngine.InputSystem;
 public class CameraController : MonoBehaviour
 {
     [Header("Camera Components")]
-    [SerializeField] private GameObject camera;
+    [SerializeField] private GameObject playerCamera;
     [SerializeField] private CinemachineOrbitalFollow cof;
     [SerializeField] private InputActionReference cameraInput;
 
@@ -18,8 +18,8 @@ public class CameraController : MonoBehaviour
 
     void Awake()
     {
-        camera = GameObject.Find("PlayerFollowCamera");
-        cof = camera.GetComponent<CinemachineOrbitalFollow>();
+        playerCamera = GameObject.Find("PlayerFollowCamera");
+        cof = playerCamera.GetComponent<CinemachineOrbitalFollow>();
     }
 
     // Update is called once per frame
