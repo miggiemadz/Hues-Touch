@@ -22,6 +22,7 @@ public class NewMonoBehaviourScript : MonoBehaviour
     [SerializeField] private float playerJumpAcceleration;
     [SerializeField] private float playerJumpDecceleration;
     [SerializeField] private float MAX_JUMP_HEIGHT;
+    private float initialJumpPosition;
     private float gravity; // the gravity force value
     private bool canJump;
     private bool isFalling;
@@ -87,10 +88,12 @@ public class NewMonoBehaviourScript : MonoBehaviour
 
         if (!IsFloorClose() && !isGrounded())
         {
+            
             gravity = -9.8f;
         }
         if (!isGrounded() && IsFloorClose())
         {
+            initialJumpPosition = gameObject.transform.position.y;
             gravity = 0f;
             playerJumpVelocity = 0f;
             canJump = true;
@@ -108,9 +111,7 @@ public class NewMonoBehaviourScript : MonoBehaviour
 
     private void FixedUpdate()
     {
-        Debug.Log(playerJumpVelocity + ", " + canJump);
-
-        if (playerJumpVelocity > MAX_JUMP_HEIGHT)
+        if (gameObject.transform.position.y - initialJumpPosition > MAX_JUMP_HEIGHT)
         {
             canJump = false;
             isFalling = true;
