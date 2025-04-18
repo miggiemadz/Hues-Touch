@@ -207,7 +207,7 @@ Transform:
   m_GameObject: {fileID: 177611062}
   serializedVersion: 2
   m_LocalRotation: {x: 0.096201375, y: 0, z: 0, w: 0.9953619}
-  m_LocalPosition: {x: 0.95, y: 20.212982, z: -12.54698}
+  m_LocalPosition: {x: -3.0380428, y: 7.9934783, z: -4.2601194}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1394,6 +1394,37 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1445912615
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1445912616}
+  m_Layer: 0
+  m_Name: CameraFollow
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1445912616
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1445912615}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -3.0380428, y: 4.3504972, z: 3.9668593}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &5760083556063216526
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1408,7 +1439,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1364543090083470997, guid: 73953690641359141b5840864452e61d, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 16.57
+      value: 8.43
       objectReference: {fileID: 0}
     - target: {fileID: 1364543090083470997, guid: 73953690641359141b5840864452e61d, type: 3}
       propertyPath: m_LocalPosition.z
@@ -1442,29 +1473,25 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 3305993845329988076, guid: 73953690641359141b5840864452e61d, type: 3}
-      propertyPath: CenterOnActivate
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3305993845329988076, guid: 73953690641359141b5840864452e61d, type: 3}
-      propertyPath: Composition.DeadZone.Size.y
-      value: 0.6
-      objectReference: {fileID: 0}
-    - target: {fileID: 3305993845329988076, guid: 73953690641359141b5840864452e61d, type: 3}
-      propertyPath: Composition.HardLimits.Size.y
-      value: 0.6
-      objectReference: {fileID: 0}
-    - target: {fileID: 3305993845329988076, guid: 73953690641359141b5840864452e61d, type: 3}
-      propertyPath: Composition.HardLimits.Offset.y
-      value: -0.35
+    - target: {fileID: 3959552369944176180, guid: 73953690641359141b5840864452e61d, type: 3}
+      propertyPath: Target.TrackingTarget
+      value: 
+      objectReference: {fileID: 1445912616}
+    - target: {fileID: 7508261593684622401, guid: 73953690641359141b5840864452e61d, type: 3}
+      propertyPath: playerJumpSpeed
+      value: 300
       objectReference: {fileID: 0}
     - target: {fileID: 7508261593684622401, guid: 73953690641359141b5840864452e61d, type: 3}
-      propertyPath: MAX_JUMP_HEIGHT
-      value: 7
-      objectReference: {fileID: 0}
+      propertyPath: cameraFollowPosition
+      value: 
+      objectReference: {fileID: 1445912616}
     - target: {fileID: 8290580429369205154, guid: 73953690641359141b5840864452e61d, type: 3}
       propertyPath: m_Name
       value: TestPlayer
+      objectReference: {fileID: 0}
+    - target: {fileID: 8312963343681900835, guid: 73953690641359141b5840864452e61d, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: -2.3995032
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -1480,3 +1507,4 @@ SceneRoots:
   - {fileID: 5760083556063216526}
   - {fileID: 1254975923}
   - {fileID: 1149339154}
+  - {fileID: 1445912616}

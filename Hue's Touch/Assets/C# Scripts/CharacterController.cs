@@ -3,6 +3,7 @@ using System.Runtime.CompilerServices;
 using Unity.Cinemachine;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.Animations;
 using UnityEngine.InputSystem;
 
 public class NewMonoBehaviourScript : MonoBehaviour
@@ -19,14 +20,13 @@ public class NewMonoBehaviourScript : MonoBehaviour
     [Header("Aerial Movement Variables")]
     [SerializeField] private float playerJumpSpeed;
     private float playerJumpVelocity;
-    [SerializeField] private float playerJumpAcceleration;
-    [SerializeField] private float playerJumpDecceleration;
+    [SerializeField] private float jumpVelocityCutOff;
     [SerializeField] private float MAX_JUMP_HEIGHT;
+    [SerializeField] private int jumpCount;
+    [SerializeField] private int maxJumpCount;
     private float initialJumpPosition;
     private float gravity; // the gravity force value
-    private bool canJump;
-    private bool isFalling;
-
+    private float lastYVelocity = 0;
 
     [Header("Aerial Movement Components")]
     [SerializeField] private InputActionReference playerJump;
@@ -46,6 +46,8 @@ public class NewMonoBehaviourScript : MonoBehaviour
     [SerializeField] private Transform cameraTransform;
     [SerializeField] private Transform cameraReferenceRoot;
     [SerializeField] private CinemachineCamera playerCamera;
+    [SerializeField] private Transform cameraFollowPosition;
+    private float cameraYPosition;
 
     [Header("Collision Components")]
     [SerializeField] private CapsuleCollider characterCollider;
@@ -61,7 +63,6 @@ public class NewMonoBehaviourScript : MonoBehaviour
     private void Awake()
     {
         rb = gameObject.GetComponent<Rigidbody>();
-        gravity = -9.8f * playerMass;
         feetPosition = transform.GetChild(0).GetComponent<Transform>();
         cameraReferenceRoot = transform.GetChild(3).gameObject.transform;
     }
@@ -72,6 +73,8 @@ public class NewMonoBehaviourScript : MonoBehaviour
 
     void Update()
     {
+        gravity = 9.8f * playerMass;
+
         inputDirection = new Vector3(playerMovement.action.ReadValue<Vector2>().x, 0, playerMovement.action.ReadValue<Vector2>().y).normalized;
         
         distanceToCollider = Mathf.Clamp(CollisionHandler(), 0, 2);
@@ -88,21 +91,22 @@ public class NewMonoBehaviourScript : MonoBehaviour
 
         if (!IsFloorClose() && !isGrounded())
         {
-            
-            gravity = -9.8f;
+            playerJumpVelocity -= gravity * Time.deltaTime;
         }
         if (!isGrounded() && IsFloorClose())
         {
+            playerJumpVelocity = 0;
             initialJumpPosition = gameObject.transform.position.y;
-            gravity = 0f;
-            playerJumpVelocity = 0f;
-            canJump = true;
-            isFalling = false;
+            jumpCount = 0;
         }
         if (!IsFloorClose() && isGrounded()) 
         {
-            gravity = 9.8f;
-            playerJumpVelocity = 0f;
+            playerJumpVelocity += gravity * Time.deltaTime;
+        }
+
+        if (IsFloorClose() || IsFalling())
+        {
+            cameraFollowPosition.transform.position = Vector3.Lerp(cameraFollowPosition.transform.position, gameObject.transform.position, Time.deltaTime * 5f);
         }
 
         if (Keyboard.current.eKey.wasPressedThisFrame) { // sorry to put this here but i might as well -- steven
@@ -111,24 +115,20 @@ public class NewMonoBehaviourScript : MonoBehaviour
 
     private void FixedUpdate()
     {
-        if (gameObject.transform.position.y - initialJumpPosition > MAX_JUMP_HEIGHT)
+
+        if ((gameObject.transform.position.y - initialJumpPosition > MAX_JUMP_HEIGHT && jumpCount > 0) || (playerJump.action.ReadValue<float>() == 0 && (!IsFloorClose() && !isGrounded())))
         {
-            canJump = false;
-            isFalling = true;
-        }
-        if (playerJump.action.ReadValue<float>() == 0 && playerJumpVelocity > 0)
-        {
-            isFalling = true;
-        }
-        if (playerJump.action.ReadValue<float>() > 0 && canJump)
-        {
-            playerJumpVelocity += playerJumpSpeed * playerJumpAcceleration;
-        }
-        if (!IsFloorClose() && playerJumpVelocity > 0 && isFalling)
-        {
-            playerJumpVelocity -= playerJumpSpeed * playerJumpDecceleration;
+            if (playerJumpVelocity > 0)
+            {
+                playerJumpVelocity -= jumpVelocityCutOff * Time.deltaTime;
+            }
         }
 
+        if (jumpCount < maxJumpCount && playerJump.action.ReadValue<float>() > 0 && !IsJumping())
+        {
+            jumpCount++;
+            playerJumpVelocity += playerJumpSpeed * Time.deltaTime;
+        }
 
         if (moveDirection.z != 0 || moveDirection.x != 0) // if either of the move inputs are pressed (vertical or horizontal)
         {
@@ -167,7 +167,7 @@ public class NewMonoBehaviourScript : MonoBehaviour
         }
 
         rb.MovePosition(new Vector3(transform.position.x + playerGroundMoveVelocity.x,
-                                    transform.position.y + playerJumpVelocity + gravity * Time.deltaTime,
+                                    transform.position.y + playerJumpVelocity * Time.deltaTime,
                                     transform.position.z + playerGroundMoveVelocity.y));
 
         Debug.DrawRay(transform.position, transform.TransformDirection(Vector3.forward), Color.yellow);
@@ -209,6 +209,34 @@ public class NewMonoBehaviourScript : MonoBehaviour
         Gizmos.DrawLine(start - Vector3.right * radius, end - Vector3.right * radius);
     }
 
+    private bool IsFalling()
+    {
+        if (playerJumpVelocity == 0 || lastYVelocity < playerJumpVelocity)
+        {
+            lastYVelocity = playerJumpVelocity;
+            return false;
+        }
+        else
+        {
+            lastYVelocity = playerJumpVelocity;
+            return true;
+        }
+    }
+
+    private bool IsJumping()
+    {
+        if (lastYVelocity > playerJumpVelocity || playerJumpVelocity == 0)
+        {
+            lastYVelocity = playerJumpVelocity;
+            return false;
+        }
+        else
+        {
+            lastYVelocity = playerJumpVelocity;
+            return true;
+        }
+    }
+
     private bool IsFloorClose()
     {
         Vector3 start = feetPosition.position + Vector3.up * .5f;
@@ -222,7 +250,7 @@ public class NewMonoBehaviourScript : MonoBehaviour
 
         if (Physics.CapsuleCast(start, end, radius, direction, out groundCheck, maxDistance, groundMask))
         {
-            return Mathf.Clamp(groundCheck.distance,0,1) < .2f;
+            return Mathf.Clamp(groundCheck.distance, 0, 1) < .2f;
         }
 
         return false;
