@@ -1479,7 +1479,7 @@ PrefabInstance:
       objectReference: {fileID: 1445912616}
     - target: {fileID: 7508261593684622401, guid: 73953690641359141b5840864452e61d, type: 3}
       propertyPath: playerJumpSpeed
-      value: 300
+      value: 900
       objectReference: {fileID: 0}
     - target: {fileID: 7508261593684622401, guid: 73953690641359141b5840864452e61d, type: 3}
       propertyPath: cameraFollowPosition

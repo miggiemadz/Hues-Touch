@@ -115,6 +115,7 @@ public class NewMonoBehaviourScript : MonoBehaviour
 
     private void FixedUpdate()
     {
+        Debug.Log(playerJumpVelocity);
 
         if ((gameObject.transform.position.y - initialJumpPosition > MAX_JUMP_HEIGHT && jumpCount > 0) || (playerJump.action.ReadValue<float>() == 0 && (!IsFloorClose() && !isGrounded())))
         {
