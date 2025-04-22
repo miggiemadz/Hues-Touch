@@ -77,9 +77,6 @@ public class NewMonoBehaviourScript : MonoBehaviour
 
     void Update()
     {
-        floorCollidingThisFrame = IsFloorColliding();
-        floorCloseThisFrame = IsFloorClose();
-
         jumpPressed = playerJump.action.ReadValue<float>() > 0;
         gravity = 9.8f * playerMass;
 
@@ -106,6 +103,9 @@ public class NewMonoBehaviourScript : MonoBehaviour
 
     private void FixedUpdate()
     {
+        floorCloseThisFrame = IsFloorClose();
+        floorCollidingThisFrame = IsFloorColliding();
+
         distanceToCollider = Mathf.Clamp(CollisionHandler(), 0, 2);
 
         if (!floorCloseThisFrame)
