@@ -114,8 +114,6 @@ public class NewMonoBehaviourScript : MonoBehaviour
 
         if (Keyboard.current.eKey.wasPressedThisFrame) { // sorry to put this here but i might as well -- steven
         ShootProjectile();}
-
-        Debug.Log(playerJumpVelocity);
     }
 
     private void FixedUpdate()
@@ -123,13 +121,11 @@ public class NewMonoBehaviourScript : MonoBehaviour
         floorCloseThisFrame = IsFloorClose();
         floorCollidingThisFrame = IsFloorColliding();
 
-        distanceToCollider = Mathf.Clamp(CollisionHandler(), 0, 2);
-
         if (!floorCollidingThisFrame)
         {
             playerJumpVelocity -= gravity * Time.fixedDeltaTime;
         }
-        if (floorCollidingThisFrame)
+        if (floorCloseThisFrame)
         {
             playerJumpVelocity = 0;
             initialJumpPosition = gameObject.transform.position.y;
@@ -181,17 +177,14 @@ public class NewMonoBehaviourScript : MonoBehaviour
             playerGroundMoveVelocity.y = Mathf.MoveTowards(playerGroundMoveVelocity.y, 0, playerGroundMoveDecceleration * Time.fixedDeltaTime);
         }
 
-        if (distanceToCollider < .2f)
+        if (!IsWallColliding())
         {
-            playerGroundMoveVelocity = Vector2.zero;
+            rb.MovePosition(new Vector3(transform.position.x + playerGroundMoveVelocity.x,
+                            transform.position.y + playerJumpVelocity * Time.fixedDeltaTime,
+                            transform.position.z + playerGroundMoveVelocity.y));
         }
 
-        rb.MovePosition(new Vector3(transform.position.x + playerGroundMoveVelocity.x,
-                        transform.position.y + playerJumpVelocity * Time.fixedDeltaTime,
-                        transform.position.z + playerGroundMoveVelocity.y));
-
-            Debug.DrawRay(transform.position, transform.TransformDirection(Vector3.forward), Color.yellow);
-
+        Debug.Log(IsWallColliding());
     }
 
     private void LateUpdate()
@@ -332,35 +325,40 @@ public class NewMonoBehaviourScript : MonoBehaviour
         return false;
     }
 
-    private float CollisionHandler()
+    private bool IsWallColliding()
     {
         Vector3 start = feetPosition.position + Vector3.up * .5f;
         Vector3 end = feetPosition.position + Vector3.up * 1.5f;
         float radius = .5f;
         Vector3 direction = moveDirection;
-        float maxDistance = .5f;
 
-        if (Physics.CapsuleCast(start, end, radius, direction, out collisionCheck, maxDistance, 3))
+        int excludedLayers = LayerMask.GetMask("Player", "Floor");
+        int wallMask = ~excludedLayers;
+
+        if (Physics.CheckCapsule(start, end, radius, wallMask))
         {
-            return collisionCheck.distance;
+            Collider[] wallHit = Physics.OverlapCapsule(start, end, radius, wallMask);
+
+            Vector3 playerPosition = transform.position;
+            Collider floorCollider;
+            Vector3 closestPoint;
+            float distanceToPoint;
+
+            foreach (Collider c in wallHit)
+            {
+                floorCollider = c;
+                closestPoint = floorCollider.ClosestPoint(playerPosition);
+                distanceToPoint = Vector3.Distance(closestPoint, playerPosition);
+
+                transform.position = new Vector3(transform.position.x, transform.position.y, transform.position.z);
+
+            }
+            return true;
         }
         else
         {
-            Vector3 vectorRight = new Vector3(moveDirection.x * Mathf.Cos(20) + moveDirection.z * Mathf.Sin(20), 0, -moveDirection.x * Mathf.Sin(20) + moveDirection.z * Mathf.Cos(20));
-            Vector3 vectorLeft = new Vector3(moveDirection.x * Mathf.Cos(20) - moveDirection.z * Mathf.Sin(20), 0, moveDirection.x * Mathf.Sin(20) + moveDirection.z * Mathf.Cos(20));
-
-            if (!WallChecker())
-            if (Physics.CapsuleCast(start, end, radius, vectorLeft, out collisionCheck, maxDistance, 3))
-            {
-                return collisionCheck.distance;
-            }
-
-            if (Physics.CapsuleCast(start, end, radius, vectorRight, out collisionCheck, maxDistance, 3))
-            {
-                return collisionCheck.distance;
-            }
+            return false;
         }
-        return 2;
     }
 
     private void ShootProjectile() { // -- steven
