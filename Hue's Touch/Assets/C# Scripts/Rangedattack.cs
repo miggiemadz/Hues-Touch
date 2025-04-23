@@ -1,48 +1,34 @@
 using UnityEngine;
 
-public class Rangedattack : MonoBehaviour
+// This script handles ranged attack behavior for an enemy, shooting projectiles at the player.
+public class RangedAttack : MonoBehaviour, IAttackBehavior
 {
-    private Rigidbody rb;
-    [Header("Projectile Settings")]
-    [SerializeField] private GameObject Projectile;
-    
-    [SerializeField] private float Damage = 20f;
-    [SerializeField] private float ProjectileSpeed = 5f;
-    [SerializeField] private float Lifetime = 2f;
-    [Header("Enemy Settings")]
-    public float ShootRadius;
-    [SerializeField] private float TimeBetweenAttacks = 1f;
-    private bool PlayerInAttackRange;
-    private LayerMask WhatIsPlayer;
+    // The projectile prefab to instantiate when attacking
+    public GameObject projectile;
 
-    public void Initialize(Enemyai2 enemyai)
+    // The point from which the projectile is fired
+    public Transform shootPoint;
+
+    // Executes the ranged attack, shooting a projectile toward the player
+    public void Attack(Transform player)
     {
-        
-        ShootRadius = 20f;
-        WhatIsPlayer = enemyai.p;
-
-        Debug.Log("Init was ran! ShootRadius set to: " + ShootRadius + " | Instance ID: " + GetInstanceID());
-    }
-    
-    private void OnEnable() { Debug.Log("Rangedattack Enabled, InstanceID: " + GetInstanceID());  }
-private void OnDisable() { Debug.Log("Rangedattack Disabled"); }
-
-    /*private void Awake()
-    {
-        rb = GetComponent<Rigidbody>();
-        if (rb == null)
+        // Ensure all required components are assigned
+        if (projectile == null || shootPoint == null || player == null)
         {
-            Debug.LogError("Projectile is missing a Rigidbody!");
+            return;
         }
 
-    }*/
+        // Instantiate the projectile at the shoot point
+        GameObject proj = Instantiate(projectile, shootPoint.position, Quaternion.identity);
 
-    private void Update()
-    {
-        //PlayerInAttackRange = Physics.CheckSphere(transform.position, ShootRadius, WhatIsPlayer);
-        if (ShootRadius == 0)
-    {
-        Debug.LogError("ShootRadius is unexpectedly 0!");
-    }
+        // Get the Projectile script attached to the instantiated projectile
+        Projectile projScript = proj.GetComponent<Projectile>();
+
+        // If the projectile has a script, set its direction toward the player
+        if (projScript != null)
+        {
+            Vector3 shootDir = (player.position - shootPoint.position).normalized;
+            projScript.SetDirection(shootDir);
+        }
     }
 }

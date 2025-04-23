@@ -102,14 +102,14 @@ public class NewMonoBehaviourScript : MonoBehaviour
             playerJumpVelocity = 0f;
         }
 
-        if (Keyboard.current.eKey.wasPressedThisFrame) { // sorry to put this here but i might as well -- steven
-        ShootProjectile();}
+        if (Keyboard.current.eKey.wasPressedThisFrame)// sorry to put this here but i might as well -- steven
+        {
+        ShootProjectile();
+        }
     }
 
     private void FixedUpdate()
     {
-        Debug.Log(playerJumpVelocity + ", " + canJump);
-
         if (playerJumpVelocity > MAX_JUMP_HEIGHT)
         {
             canJump = false;

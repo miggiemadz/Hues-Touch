@@ -24,14 +24,14 @@ public class Enemyai2 : MonoBehaviour
     [SerializeField] private GameObject projectile;
     [SerializeField] private int MeleeDamage;
     [SerializeField] private bool Provoked = false;
-    private Rangedattack rangedattack;
+    //private Rangedattack rangedattack;
     
     private void Awake()
     {
         player = GameObject.Find("TestPlayer").transform;
         agent = GetComponent<NavMeshAgent>();
-        rangedattack = GetComponent<Rangedattack>();
-        rangedattack.Initialize(this);
+        //rangedattack = GetComponent<Rangedattack>();
+        //rangedattack.Initialize(this);
     }
 
     private void OnValidate()
