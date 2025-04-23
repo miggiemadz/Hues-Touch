@@ -22,11 +22,12 @@ public class NewMonoBehaviourScript : MonoBehaviour
 
     [Header("Aerial Movement Variables")]
     [SerializeField] private float playerJumpSpeed;
-    private float playerJumpVelocity;
     [SerializeField] private float jumpVelocityCutOff;
     [SerializeField] private float MAX_JUMP_HEIGHT;
     [SerializeField] private int jumpCount;
     [SerializeField] private int maxJumpCount;
+    private bool canJump;
+    private float playerJumpVelocity;
     private bool jumpPressed;
     private float initialJumpPosition;
     private float gravity; // the gravity force value
@@ -66,6 +67,22 @@ public class NewMonoBehaviourScript : MonoBehaviour
 
     private void Awake()
     {
+        // Grounded Movement Variables
+        playerRotateSpeed = 20f;
+        playerGroundMoveAcceleration = 1f;
+        playerGroundMoveDecceleration = 1.2f;
+        PLAYER_MAX_SPEED = 0.4f;
+
+        // Aerial Movement Variables
+        playerJumpSpeed = 900f;
+        jumpVelocityCutOff = 150f;
+        MAX_JUMP_HEIGHT = 7f;
+        jumpCount = 0;
+        maxJumpCount = 2;
+
+        // Camera Components
+        cameraFollowPosition = GameObject.Find("CameraFollow").transform;
+
         rb = gameObject.GetComponent<Rigidbody>();
         feetPosition = transform.GetChild(0).GetComponent<Transform>();
         cameraReferenceRoot = transform.GetChild(3).gameObject.transform;
@@ -108,11 +125,11 @@ public class NewMonoBehaviourScript : MonoBehaviour
 
         distanceToCollider = Mathf.Clamp(CollisionHandler(), 0, 2);
 
-        if (!floorCloseThisFrame)
+        if (!floorCollidingThisFrame)
         {
             playerJumpVelocity -= gravity * Time.fixedDeltaTime;
         }
-        if (floorCloseThisFrame)
+        if (floorCollidingThisFrame)
         {
             playerJumpVelocity = 0;
             initialJumpPosition = gameObject.transform.position.y;
@@ -254,7 +271,7 @@ public class NewMonoBehaviourScript : MonoBehaviour
 
         if (Physics.CapsuleCast(start, end, radius, direction, out groundCheck, maxDistance, groundMask))
         {
-            return Mathf.Clamp(groundCheck.distance, 0, 1) < .5f;
+            return Mathf.Clamp(groundCheck.distance, 0, 1) < .3f;
         }
 
         return false;
@@ -285,6 +302,7 @@ public class NewMonoBehaviourScript : MonoBehaviour
                 distanceToPoint = Vector3.Distance(closestPoint,playerPosition);
 
                 transform.position = new Vector3(transform.position.x, transform.position.y + distanceToPoint, transform.position.z);
+
             }
             return true;
         }

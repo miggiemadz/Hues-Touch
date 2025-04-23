@@ -1511,7 +1511,7 @@ PrefabInstance:
     - target: {fileID: 7508261593684622401, guid: 73953690641359141b5840864452e61d, type: 3}
       propertyPath: cameraFollowPosition
       value: 
-      objectReference: {fileID: 1445912616}
+      objectReference: {fileID: 0}
     - target: {fileID: 8290580429369205154, guid: 73953690641359141b5840864452e61d, type: 3}
       propertyPath: m_Name
       value: TestPlayer
