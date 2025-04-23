@@ -4,13 +4,17 @@ using UnityEngine.UI;
 public class Health : MonoBehaviour // I HATE UI IT SUCKSSSSSSS ;-;
 {
     public float maxHealth = 100f;
-    public float currentHealth;
-    private Image healthFill;
-    [SerializeField] private bool ShowHealthBar = true;
-    public void Start()
+    private float currentHealth;
+    public healthScript healthBar;
+
+    //private Image healthFill;
+    //[SerializeField] private bool ShowHealthBar = true;
+
+    public void Start() 
     {
-        currentHealth = maxHealth;
-        if (ShowHealthBar)
+        currentHealth = maxHealth; //set player health to 100 when game starts
+        healthBar.setMaxHealth((int)maxHealth); //for healthbar (changing it to int because setMaxHealth method is a dick)
+        /*if (ShowHealthBar)
         {
             // Create Canvas
             GameObject canvasGO = new GameObject("HealthBarCanvas");
@@ -46,39 +50,35 @@ public class Health : MonoBehaviour // I HATE UI IT SUCKSSSSSSS ;-;
             fillRect.anchorMax = Vector2.one;
             fillRect.offsetMin = Vector2.zero;
             fillRect.offsetMax = Vector2.zero;
-        }
+        }*/
     }
+
     private void Update()
     {
-        if (ShowHealthBar)
+
+        //DAMAGE TEST (bc its not working w dummy atm)
+        if (Input.GetKeyDown(KeyCode.Space))
         {
-            UpdateHealthBar();
+            TakeDamage(20);
         }
     }
 
-    private void UpdateHealthBar()
-    {
-        if (ShowHealthBar)
-        {
-            float normalized = currentHealth / maxHealth;
-            normalized = Mathf.Clamp01(normalized);
-            
-            // Scale the X of the fill
-            healthFill.rectTransform.localScale = new Vector3(normalized, 1, 1);
-        }
-    }
-
+    //4 whenever damage is taken (for ex: takeDamage(20) is called on ln 65)
     public void TakeDamage(float amount)
     {
         currentHealth -= amount;
-        try{
-        GetComponent<Enemyai2>().Provoke();
-        } 
-        catch (System.Exception e){Debug.Log(e.Message);}
-        if (currentHealth <= 0)
-        {
-            Debug.Log("Dead");
-            Destroy(gameObject);
-        }
+        healthBar.setHealth((int)currentHealth);
     }
+
+    //private void UpdateHealthBar()
+    //{
+    //    if (ShowHealthBar)
+    //    {
+    //        float normalized = currentHealth / maxHealth;
+    //        normalized = Mathf.Clamp01(normalized);
+
+    //        // Scale the X of the fill
+    //        healthFill.rectTransform.localScale = new Vector3(normalized, 1, 1);
+    //    }
+    //}
 }

@@ -42,6 +42,7 @@ public class NewMonoBehaviourScript : MonoBehaviour
     [SerializeField] private GameObject projectilePrefab;
     [SerializeField] private Transform shootPoint; // where the projectile spawns from
 
+
     private void Awake()
     {
         rb = gameObject.GetComponent<Rigidbody>();
@@ -50,10 +51,9 @@ public class NewMonoBehaviourScript : MonoBehaviour
         camera = transform.GetChild(2).gameObject.transform;
     }
 
-    void Start()
-    {
-        
-    }
+    //void Start()
+    //{
+    //}
 
     void Update()
     {
@@ -189,7 +189,17 @@ public class NewMonoBehaviourScript : MonoBehaviour
         projScript.SetDirection(shootDirection);
     } else {
         Debug.LogError("Projectile script is missing on the instantiated projectile!");}
-    }    
+    }
+
+ 
+
+    //private void OnTriggerEnter(Collider other)
+    //{
+    //    if (other.gameObject.name == "Damagedetector")
+    //    {
+    //        takeDamage(20);
+    //    }
+    //}
 }
 
 
