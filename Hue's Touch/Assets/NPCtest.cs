@@ -14,22 +14,21 @@ public class NPCtest : MonoBehaviour
     {
         //if player presses "F" while in range
         if(playerDetection && Input.GetKeyDown(KeyCode.F)){
-            //print console statement
-            print("Dialouge Started!");
+            print("Dialouge Started!"); //print console statement
             textBox.text = "Hello!\n I'm Bob!";
 
             //(TO DO: update UI or add speech bubble above player?)
         }
-        
     }
 
     //using OnTrigger methods
     //If player collides w sphere
     private void OnTriggerEnter(Collider other)
     {
-        if (other.name == "NPCdetector")//check if colliding asset is our player
+        if (other.CompareTag("Player"))//check if colliding asset has npc tag (other.name not working)
         {
             playerDetection = true;
+            //(TO DO: set canvas w "F" key above player instead of textbox text)
         }
     }
 
@@ -37,5 +36,6 @@ public class NPCtest : MonoBehaviour
     private void OnTriggerExit(Collider other)
     {
         playerDetection = false;
+        //take away canvas w "F" key above player? 
     }
 }

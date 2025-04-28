@@ -2,9 +2,10 @@ using UnityEngine;
 
 public class damage : MonoBehaviour
 {
-    private float dummyDamage = 20;
-    public Health playerHealth;
-    [SerializeField]public healthScript healthBar;
+    //private float dummyDamage = 20;
+    private Health playerHealth;
+    //[SerializeField]public healthScript healthBar;
+    bool playerDetection = false;
 
     //or use onTriggerStay to update every frame
 
@@ -29,17 +30,26 @@ public class damage : MonoBehaviour
         
     }
 
+    private void Update()
+    {
+        //if player presses "F" while in range
+        if (playerDetection)
+        {
+            Debug.Log("Player collided");
+            playerHealth.TakeDamage(20); //-20hp (accessing takeDamage func from playerhealth)
+        }
+    }
 
-  
-    //private void OnTriggerEnter(Collider other)
-    //{
-    //    if (other.gameObject.name == "TestPlayer")
-    //    {
-    //        playerHealth.TakeDamage(10); //-20hp (accessing takeDamage func from playerhealth)
-    //    }
-    //    //if (other.gameObject.tag == "Player")
-    //    //{
-    //    //    playerHealth.TakeDamage(20); //-20hp (accessing takeDamage func from playerhealth)
-    //    //}
-    //}
+
+    private void OnTriggerEnter(Collider other)
+    {
+        //if (other.gameObject.name == "TestPlayer")
+        //{
+        //    playerHealth.TakeDamage(10); //-20hp (accessing takeDamage func from playerhealth)
+        //}
+        if (other.CompareTag("Player"))
+        {
+            playerDetection = true;
+        }
+    }
 }

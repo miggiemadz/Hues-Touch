@@ -5,7 +5,7 @@ public class tutorialToggle : MonoBehaviour{
     [Header("Icon Assets")]
     [SerializeField] public GameObject tutIcon; //access the tutorial icon
     [SerializeField] public GameObject tutPage; //access the hidden tutorial canvas (when H is pressed, enable or disable)
-    [SerializeField] public TMP_Text tutText; // access text above tut icon
+    //[SerializeField] public TMP_Text tutText; // access text above tut icon
 
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -28,6 +28,6 @@ public class tutorialToggle : MonoBehaviour{
         // Toggle everything based on the panel's current state
         tutPage.SetActive(!isPageActive); //set page to be opposite of current state
         tutIcon.SetActive(isPageActive); // Show icon when panel is hidden
-        tutText.gameObject.SetActive(isPageActive); // Show text when panel is hidden
+        //tutText.gameObject.SetActive(isPageActive); // Show text when panel is hidden
     }
 }
