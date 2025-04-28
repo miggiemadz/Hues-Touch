@@ -329,7 +329,7 @@ public class NewMonoBehaviourScript : MonoBehaviour
     {
         Vector3 start = feetPosition.position + Vector3.up * .5f;
         Vector3 end = feetPosition.position + Vector3.up * 1.5f;
-        float radius = .5f;
+        float radius = .3f;
         Vector3 direction = moveDirection;
 
         int excludedLayers = LayerMask.GetMask("Player", "Floor");
