@@ -4,9 +4,9 @@ using TMPro;
 public class Inventory : MonoBehaviour
 {
     private int sandDollar = 0;
-    public TextMeshProUGUI dollarCount; //to alter on-screen coin count
-
+    
     [Header("Icon Assets")]
+    public TextMeshProUGUI dollarCount; //to alter on-screen coin count
     [SerializeField] public GameObject bagIcon; //access the tutorial icon
     [SerializeField] public GameObject inventoryPage; //access the hidden tutorial canvas (when H is pressed, enable or disable)
 
@@ -17,7 +17,13 @@ public class Inventory : MonoBehaviour
         }
     }
 
-    private void OnTriggerEnter(Collider other)
+    //public int sandDollar { get; private set; } //can be referenced outside but only set in this script
+    //public void diamondCollected()
+    //{
+    //    sandDollar++;
+    //}
+    
+    private void OnTriggerEnter(Collider other) //or: attatch this 2 every dollar & use ^ function
     {
         if(other.CompareTag("Collectible")) //if colliding obj has tag of "Collectible"
         {

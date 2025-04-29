@@ -38,4 +38,6 @@ public class NPCtest : MonoBehaviour
         playerDetection = false;
         //take away canvas w "F" key above player? 
     }
+
+    //addd collider
 }

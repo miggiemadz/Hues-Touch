@@ -6,6 +6,7 @@ public class Health : MonoBehaviour // I HATE UI IT SUCKSSSSSSS ;-;
     public float maxHealth = 100f;
     private float currentHealth;
     public healthScript healthBar;
+    //public Image fill;
 
     //private Image healthFill;
     //[SerializeField] private bool ShowHealthBar = true;
@@ -61,6 +62,8 @@ public class Health : MonoBehaviour // I HATE UI IT SUCKSSSSSSS ;-;
         {
             TakeDamage(20);
         }
+
+        //fill.fillAmount = currentHealth / maxHealth;
     }
 
     //4 whenever damage is taken (for ex: takeDamage(20) is called on ln 65)

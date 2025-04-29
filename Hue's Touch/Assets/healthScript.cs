@@ -19,4 +19,18 @@ public class healthScript : MonoBehaviour
         slider.value = health; //changes value of the slider 
         fill.color = gradient.Evaluate(slider.normalizedValue); //change color value
     }
+
+    //public class HealthBar : MonoBehaviour
+    //{
+    //    public Image fillImage;
+
+    //    public float currentHealth;
+    //    public float maxHealth = 100;
+
+    //    void Update()
+    //    {
+    //        fillImage.fillAmount = currentHealth / maxHealth;
+    //    }
+    //}
+
 }

@@ -18,6 +18,7 @@ public class menu : MonoBehaviour{
     [SerializeField] private GameObject noSavedGamePopup = null; //pop-up that says "no save file"
     [SerializeField] private GameObject confimationPrompt = null; //pop-up for settings saves
     [SerializeField] private GameObject popupContainer = null; //have 2 activate this as well^ during coroutine
+    [SerializeField] private GameObject saveContainer = null; //to make save game menu go away when "no save file" pops up
 
 
 
@@ -42,6 +43,7 @@ public class menu : MonoBehaviour{
         else{ //if "savedLevel" file isn't found/nothing available to load
             popupContainer.SetActive(true);
             noSavedGamePopup.SetActive(true);
+            saveContainer.SetActive(false);
         }
     }
 
