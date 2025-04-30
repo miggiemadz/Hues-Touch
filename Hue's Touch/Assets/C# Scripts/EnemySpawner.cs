@@ -31,7 +31,7 @@ public class EnemySpawner : MonoBehaviour {
             // talk to enemy created
             Health ai = enemy.GetComponent<Health>();
             if (ai != null) {
-                ai.spawner = this;
+                //ai.spawner = this;
             }
         } else {
             Debug.Log("Could not find NavMesh position near: " + randomPoint);
