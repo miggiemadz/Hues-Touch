@@ -184,13 +184,14 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 8
   spawner: {fileID: 0}
-  enemyType: 1
+  enemyType: 0
   WalkPointRange: 50
   SightRange: 15
-  AttackRange: 10
+  AttackRange: 1
   TimeBetweenAttacks: 1
-  projectile: {fileID: 4105635836826058001, guid: c39bf872a2d119e4d9d1b1750fb86495, type: 3}
+  projectile: {fileID: 0}
   MeleeDamage: 0
+  Provoked: 1
 --- !u!114 &-3909466285323245040
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -205,3 +206,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   maxHealth: 100
   currentHealth: 0
+  ShowHealthBar: 1

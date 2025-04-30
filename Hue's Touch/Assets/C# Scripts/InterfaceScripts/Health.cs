@@ -7,6 +7,7 @@ public class Health : MonoBehaviour // I HATE UI IT SUCKSSSSSSS ;-;
     public float currentHealth;
     private Image healthFill;
     [SerializeField] private bool ShowHealthBar = true;
+    public EnemySpawner spawner;
     public void Start()
     {
         currentHealth = maxHealth;
@@ -71,14 +72,13 @@ public class Health : MonoBehaviour // I HATE UI IT SUCKSSSSSSS ;-;
     public void TakeDamage(float amount)
     {
         currentHealth -= amount;
-        try{
-        GetComponent<Enemyai2>().Provoke();
-        } 
-        catch (System.Exception e){Debug.Log(e.Message);}
+        GetComponent<EnemyAI>()?.Provoke();
         if (currentHealth <= 0)
         {
             Debug.Log("Dead");
             Destroy(gameObject);
+                spawner?.EnemyDied();
         }
+        
     }
 }
