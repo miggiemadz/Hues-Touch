@@ -27,8 +27,8 @@ public class menu : MonoBehaviour{
     [SerializeField] public float defaultSensX = 50f;
     [SerializeField] public float defaultSensY = 50f;
 
-    //whenever "Yes" button is pressed in load/new game scene
-    public void newGame(){
+    
+    public void newGame(){ //attatched to "Yes" button in load/new game scene
         //(FIX)SceneManager.LoadScene(_newGameLevel); //loads a new game w name "_newGameLevel" (Sidney Test for now)
         SceneManager.LoadScene(1); // switches to scene w/ index of '1' (gameScene = 1 in build profiles)
     }
@@ -52,8 +52,6 @@ public class menu : MonoBehaviour{
         Debug.Log("Quit"); //console statement
         Application.Quit(); //quits the game
     }
-
-
 
     //SETTINGS (volume, sens, etc)
 

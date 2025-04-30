@@ -3,10 +3,19 @@ using UnityEngine.UI;
 
 public class Health : MonoBehaviour // I HATE UI IT SUCKSSSSSSS ;-;
 {
+    [Header("Grounded Movement Variables")]
     public float maxHealth = 100f;
     private float currentHealth;
     public healthScript healthBar;
-    //public Image fill;
+
+    [Header("Respawn Variables")]
+    public float threshold; // minimum y-value until player respawns(-10)
+    public GameObject respawnScreen; //to show respawn screen
+    public GameManager gameManagerScript;
+
+    //TO-DO: new healthbar-> use splatter sprite & create dull version for lost heart/damage
+
+
 
     //private Image healthFill;
     //[SerializeField] private bool ShowHealthBar = true;
@@ -65,6 +74,17 @@ public class Health : MonoBehaviour // I HATE UI IT SUCKSSSSSSS ;-;
 
         //fill.fillAmount = currentHealth / maxHealth;
     }
+
+    public void FixedUpdate()
+    {
+        //if player falls off map/if player health = 0
+        if (transform.position.y < threshold || currentHealth == 0) //if playerhealth<0 or if player reaches threshold/falls off map
+        {
+            Debug.Log("Dead");
+            gameManagerScript.gameOver(); //accessing func from gamemanager (display respawn screen)
+        }
+    }
+
 
     //4 whenever damage is taken (for ex: takeDamage(20) is called on ln 65)
     public void TakeDamage(float amount)
