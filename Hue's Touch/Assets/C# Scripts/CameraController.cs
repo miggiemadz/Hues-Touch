@@ -20,6 +20,8 @@ public class CameraController : MonoBehaviour
     {
         playerCamera = GameObject.Find("PlayerFollowCamera");
         cof = playerCamera.GetComponent<CinemachineOrbitalFollow>();
+
+        playerCamera.GetComponent<CinemachineCamera>().Target.TrackingTarget = GameObject.Find("CameraFollow").transform;
     }
 
     // Update is called once per frame

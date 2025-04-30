@@ -1,8 +1,10 @@
 using System.Collections.Generic;
+using System.Net;
 using System.Runtime.CompilerServices;
 using Unity.Cinemachine;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.Animations;
 using UnityEngine.InputSystem;
 
 public class NewMonoBehaviourScript : MonoBehaviour
@@ -12,20 +14,24 @@ public class NewMonoBehaviourScript : MonoBehaviour
     [SerializeField] private float playerGroundMoveAcceleration; // how fast the player accelerates from the start of input
     [SerializeField] private float playerGroundMoveDecceleration; // how fast the player deccelerates after inputs end
     [SerializeField] private float PLAYER_MAX_SPEED; // the max speed the player can reach
+    private bool floorCloseThisFrame;
+    private bool floorCollidingThisFrame;
 
     [Header("Grounded Movement Components")]
     private Vector2 playerGroundMoveVelocity; // the directional velocity that the player travels in
 
     [Header("Aerial Movement Variables")]
     [SerializeField] private float playerJumpSpeed;
-    private float playerJumpVelocity;
-    [SerializeField] private float playerJumpAcceleration;
-    [SerializeField] private float playerJumpDecceleration;
+    [SerializeField] private float jumpVelocityCutOff;
     [SerializeField] private float MAX_JUMP_HEIGHT;
-    private float gravity; // the gravity force value
+    [SerializeField] private int jumpCount;
+    [SerializeField] private int maxJumpCount;
     private bool canJump;
-    private bool isFalling;
-
+    private float playerJumpVelocity;
+    private bool jumpPressed;
+    private float initialJumpPosition;
+    private float gravity; // the gravity force value
+    private float lastYPosition = 0;
 
     [Header("Aerial Movement Components")]
     [SerializeField] private InputActionReference playerJump;
@@ -45,6 +51,8 @@ public class NewMonoBehaviourScript : MonoBehaviour
     [SerializeField] private Transform cameraTransform;
     [SerializeField] private Transform cameraReferenceRoot;
     [SerializeField] private CinemachineCamera playerCamera;
+    [SerializeField] private Transform cameraFollowPosition;
+    private float cameraYPosition;
 
     [Header("Collision Components")]
     [SerializeField] private CapsuleCollider characterCollider;
@@ -59,8 +67,23 @@ public class NewMonoBehaviourScript : MonoBehaviour
 
     private void Awake()
     {
+        // Grounded Movement Variables
+        playerRotateSpeed = 20f;
+        playerGroundMoveAcceleration = 1f;
+        playerGroundMoveDecceleration = 1.2f;
+        PLAYER_MAX_SPEED = 0.4f;
+
+        // Aerial Movement Variables
+        playerJumpSpeed = 900f;
+        jumpVelocityCutOff = 150f;
+        MAX_JUMP_HEIGHT = 7f;
+        jumpCount = 0;
+        maxJumpCount = 2;
+
+        // Camera Components
+        cameraFollowPosition = GameObject.Find("CameraFollow").transform;
+
         rb = gameObject.GetComponent<Rigidbody>();
-        gravity = -9.8f * playerMass;
         feetPosition = transform.GetChild(0).GetComponent<Transform>();
         cameraReferenceRoot = transform.GetChild(3).gameObject.transform;
     }
@@ -71,10 +94,11 @@ public class NewMonoBehaviourScript : MonoBehaviour
 
     void Update()
     {
+        jumpPressed = playerJump.action.ReadValue<float>() > 0;
+        gravity = 9.8f * playerMass;
+
         inputDirection = new Vector3(playerMovement.action.ReadValue<Vector2>().x, 0, playerMovement.action.ReadValue<Vector2>().y).normalized;
         
-        distanceToCollider = Mathf.Clamp(CollisionHandler(), 0, 2);
-
         Vector3 cameraDiff = playerCamera.Follow.position - cameraTransform.position;
         cameraDiff.y = 0;
         cameraDiff.Normalize();
@@ -85,22 +109,8 @@ public class NewMonoBehaviourScript : MonoBehaviour
 
         moveDirection = flatForward * inputDirection.z + flatRight * inputDirection.x; // moveDirections vector2 values are read from the playerMovement input map
 
-        if (!IsFloorClose() && !isGrounded())
-        {
-            gravity = -9.8f;
-        }
-        if (!isGrounded() && IsFloorClose())
-        {
-            gravity = 0f;
-            playerJumpVelocity = 0f;
-            canJump = true;
-            isFalling = false;
-        }
-        if (!IsFloorClose() && isGrounded()) 
-        {
-            gravity = 9.8f;
-            playerJumpVelocity = 0f;
-        }
+        cameraFollowPosition.transform.position = Vector3.Lerp(cameraFollowPosition.transform.position, new Vector3(transform.position.x, initialJumpPosition, transform.position.z), Time.deltaTime * 5f);
+
 
         if (Keyboard.current.eKey.wasPressedThisFrame) { // sorry to put this here but i might as well -- steven
         ShootProjectile();}
@@ -108,34 +118,41 @@ public class NewMonoBehaviourScript : MonoBehaviour
 
     private void FixedUpdate()
     {
-        Debug.Log(playerJumpVelocity + ", " + canJump);
+        floorCloseThisFrame = IsFloorClose();
+        floorCollidingThisFrame = IsFloorColliding();
 
-        if (playerJumpVelocity > MAX_JUMP_HEIGHT)
+        if (!floorCollidingThisFrame)
         {
-            canJump = false;
-            isFalling = true;
+            playerJumpVelocity -= gravity * Time.fixedDeltaTime;
         }
-        if (playerJump.action.ReadValue<float>() == 0 && playerJumpVelocity > 0)
+        if (floorCloseThisFrame)
         {
-            isFalling = true;
-        }
-        if (playerJump.action.ReadValue<float>() > 0 && canJump)
-        {
-            playerJumpVelocity += playerJumpSpeed * playerJumpAcceleration;
-        }
-        if (!IsFloorClose() && playerJumpVelocity > 0 && isFalling)
-        {
-            playerJumpVelocity -= playerJumpSpeed * playerJumpDecceleration;
+            playerJumpVelocity = 0;
+            initialJumpPosition = gameObject.transform.position.y;
+            jumpCount = 0;
         }
 
+        if ((gameObject.transform.position.y - initialJumpPosition > MAX_JUMP_HEIGHT && jumpCount > 0) || (!jumpPressed && gameObject.transform.position.y > initialJumpPosition))
+        {
+            if (playerJumpVelocity > 0)
+            {
+                playerJumpVelocity -= jumpVelocityCutOff * Time.fixedDeltaTime;
+            }
+        }
+
+        if (jumpCount < maxJumpCount && jumpPressed)
+        {
+            jumpCount++;
+            playerJumpVelocity += playerJumpSpeed * Time.fixedDeltaTime;
+        }
 
         if (moveDirection.z != 0 || moveDirection.x != 0) // if either of the move inputs are pressed (vertical or horizontal)
         {
             Quaternion playerRotation = Quaternion.LookRotation(moveDirection);
-            rb.MoveRotation(Quaternion.Slerp(rb.rotation, playerRotation, rotationSpeed * Time.deltaTime));
+            rb.MoveRotation(Quaternion.Slerp(rb.rotation, playerRotation, rotationSpeed * Time.fixedDeltaTime));
 
-            playerGroundMoveVelocity.x += playerGroundMoveAcceleration * Time.deltaTime * moveDirection.x;
-            playerGroundMoveVelocity.y += playerGroundMoveAcceleration * Time.deltaTime * moveDirection.z;
+            playerGroundMoveVelocity.x += playerGroundMoveAcceleration * Time.fixedDeltaTime * moveDirection.x;
+            playerGroundMoveVelocity.y += playerGroundMoveAcceleration * Time.fixedDeltaTime * moveDirection.z;
             // ^ updates the velocity in respects to acceleration, time and direction for the y and x axis
 
             if (moveDirection.z != 0 && moveDirection.x != 0) // if both move inputs are pressed (vertical and horizontal)
@@ -153,24 +170,26 @@ public class NewMonoBehaviourScript : MonoBehaviour
         }
         if (moveDirection.x < .1f && moveDirection.x > -.1f)
         {
-            playerGroundMoveVelocity.x = Mathf.MoveTowards(playerGroundMoveVelocity.x, 0, playerGroundMoveDecceleration * Time.deltaTime);
+            playerGroundMoveVelocity.x = Mathf.MoveTowards(playerGroundMoveVelocity.x, 0, playerGroundMoveDecceleration * Time.fixedDeltaTime);
         }
         if (moveDirection.z < .1f && moveDirection.z > -.1f)
         {
-            playerGroundMoveVelocity.y = Mathf.MoveTowards(playerGroundMoveVelocity.y, 0, playerGroundMoveDecceleration * Time.deltaTime);
+            playerGroundMoveVelocity.y = Mathf.MoveTowards(playerGroundMoveVelocity.y, 0, playerGroundMoveDecceleration * Time.fixedDeltaTime);
         }
 
-        if (distanceToCollider < .2f)
+        if (!IsWallColliding())
         {
-            playerGroundMoveVelocity = Vector2.zero;
+            rb.MovePosition(new Vector3(transform.position.x + playerGroundMoveVelocity.x,
+                            transform.position.y + playerJumpVelocity * Time.fixedDeltaTime,
+                            transform.position.z + playerGroundMoveVelocity.y));
         }
 
-        rb.MovePosition(new Vector3(transform.position.x + playerGroundMoveVelocity.x,
-                                    transform.position.y + playerJumpVelocity + gravity * Time.deltaTime,
-                                    transform.position.z + playerGroundMoveVelocity.y));
+        Debug.Log(IsWallColliding());
+    }
 
-        Debug.DrawRay(transform.position, transform.TransformDirection(Vector3.forward), Color.yellow);
-
+    private void LateUpdate()
+    {
+        lastYPosition = gameObject.transform.position.y;
     }
 
     private void OnDrawGizmos()
@@ -208,26 +227,50 @@ public class NewMonoBehaviourScript : MonoBehaviour
         Gizmos.DrawLine(start - Vector3.right * radius, end - Vector3.right * radius);
     }
 
+    private bool IsFalling()
+    {
+        if (IsFloorClose() || lastYPosition < transform.position.y)
+        {
+            return false;
+        }
+        else
+        {
+            return true;
+        }
+    }
+
+    private bool IsJumping()
+    {
+        if (lastYPosition > transform.position.y || IsFloorClose())
+        {
+            return false;
+        }
+        else
+        {
+            return true;
+        }
+    }
+
     private bool IsFloorClose()
     {
         Vector3 start = feetPosition.position + Vector3.up * .5f;
         Vector3 end = feetPosition.position + Vector3.up * 1.5f;
         float radius = .5f;
         Vector3 direction = transform.TransformDirection(Vector3.down);
-        float maxDistance = 2f;
+        float maxDistance = 5f;
 
         int excludedLayers = LayerMask.GetMask("Player", "Walls");
         int groundMask = ~excludedLayers;
 
         if (Physics.CapsuleCast(start, end, radius, direction, out groundCheck, maxDistance, groundMask))
         {
-            return Mathf.Clamp(groundCheck.distance,0,1) < .2f;
+            return Mathf.Clamp(groundCheck.distance, 0, 1) < .3f;
         }
 
         return false;
     }
 
-    private bool isGrounded()
+    private bool IsFloorColliding()
     {
         Vector3 start = feetPosition.position + Vector3.up * .5f;
         Vector3 end = feetPosition.position + Vector3.up * 1.5f;
@@ -236,7 +279,30 @@ public class NewMonoBehaviourScript : MonoBehaviour
         int excludedLayers = LayerMask.GetMask("Player", "Walls");
         int groundMask = ~excludedLayers;
 
-        return Physics.CheckCapsule(start, end, radius, groundMask);
+        if (Physics.CheckCapsule(start, end, radius, groundMask))
+        {
+            Collider[] floorHit = Physics.OverlapCapsule(start, end, radius, groundMask);
+
+            Vector3 playerPosition = transform.position;
+            Collider floorCollider;
+            Vector3 closestPoint;
+            float distanceToPoint;
+
+            foreach (Collider c in floorHit)
+            {
+                floorCollider = c;
+                closestPoint = floorCollider.ClosestPoint(playerPosition);
+                distanceToPoint = Vector3.Distance(closestPoint,playerPosition);
+
+                transform.position = new Vector3(transform.position.x, transform.position.y + distanceToPoint, transform.position.z);
+
+            }
+            return true;
+        }
+        else
+        {
+            return false;
+        }
     }
 
     private bool WallChecker()
@@ -259,35 +325,40 @@ public class NewMonoBehaviourScript : MonoBehaviour
         return false;
     }
 
-    private float CollisionHandler()
+    private bool IsWallColliding()
     {
         Vector3 start = feetPosition.position + Vector3.up * .5f;
         Vector3 end = feetPosition.position + Vector3.up * 1.5f;
-        float radius = .5f;
+        float radius = .3f;
         Vector3 direction = moveDirection;
-        float maxDistance = .5f;
 
-        if (Physics.CapsuleCast(start, end, radius, direction, out collisionCheck, maxDistance, 3))
+        int excludedLayers = LayerMask.GetMask("Player", "Floor");
+        int wallMask = ~excludedLayers;
+
+        if (Physics.CheckCapsule(start, end, radius, wallMask))
         {
-            return collisionCheck.distance;
+            Collider[] wallHit = Physics.OverlapCapsule(start, end, radius, wallMask);
+
+            Vector3 playerPosition = transform.position;
+            Collider floorCollider;
+            Vector3 closestPoint;
+            float distanceToPoint;
+
+            foreach (Collider c in wallHit)
+            {
+                floorCollider = c;
+                closestPoint = floorCollider.ClosestPoint(playerPosition);
+                distanceToPoint = Vector3.Distance(closestPoint, playerPosition);
+
+                transform.position = new Vector3(transform.position.x, transform.position.y, transform.position.z);
+
+            }
+            return true;
         }
         else
         {
-            Vector3 vectorRight = new Vector3(moveDirection.x * Mathf.Cos(20) + moveDirection.z * Mathf.Sin(20), 0, -moveDirection.x * Mathf.Sin(20) + moveDirection.z * Mathf.Cos(20));
-            Vector3 vectorLeft = new Vector3(moveDirection.x * Mathf.Cos(20) - moveDirection.z * Mathf.Sin(20), 0, moveDirection.x * Mathf.Sin(20) + moveDirection.z * Mathf.Cos(20));
-
-            if (!WallChecker())
-            if (Physics.CapsuleCast(start, end, radius, vectorLeft, out collisionCheck, maxDistance, 3))
-            {
-                return collisionCheck.distance;
-            }
-
-            if (Physics.CapsuleCast(start, end, radius, vectorRight, out collisionCheck, maxDistance, 3))
-            {
-                return collisionCheck.distance;
-            }
+            return false;
         }
-        return 2;
     }
 
     private void ShootProjectile() { // -- steven
