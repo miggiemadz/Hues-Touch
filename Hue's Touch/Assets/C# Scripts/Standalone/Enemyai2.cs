@@ -18,15 +18,20 @@ public class Enemyai2 : MonoBehaviour
     [SerializeField] private EnemyType enemyType;
     [SerializeField] private float WalkPointRange = 50;
     [SerializeField] private float SightRange = 25, AttackRange = 10;
+    public float AttackRangeValue => AttackRange;
+    public LayerMask p => WhatIsPlayer;
     [SerializeField] private float TimeBetweenAttacks = 2;
     [SerializeField] private GameObject projectile;
     [SerializeField] private int MeleeDamage;
     [SerializeField] private bool Provoked = false;
-
+    //private Rangedattack rangedattack;
+    
     private void Awake()
     {
         player = GameObject.Find("TestPlayer").transform;
         agent = GetComponent<NavMeshAgent>();
+        //rangedattack = GetComponent<Rangedattack>();
+        //rangedattack.Initialize(this);
     }
 
     private void OnValidate()
@@ -42,12 +47,15 @@ public class Enemyai2 : MonoBehaviour
     {
         PlayerInSightRange = Physics.CheckSphere(transform.position, SightRange, WhatIsPlayer);
         PlayerInAttackRange = Physics.CheckSphere(transform.position, AttackRange, WhatIsPlayer);
-
-        if (!PlayerInSightRange && !PlayerInAttackRange) Patrolling();
         if (Provoked)
         {
-        if (PlayerInSightRange && !PlayerInAttackRange) ChasePlayer();
-        if (PlayerInSightRange && PlayerInAttackRange) AttackPlayer();
+            if (!PlayerInSightRange && !PlayerInAttackRange) Patrolling();
+            if (PlayerInSightRange && !PlayerInAttackRange) ChasePlayer();
+            if (PlayerInSightRange && PlayerInAttackRange) AttackPlayer();
+        } 
+        else
+        {
+            Patrolling();
         }
     }
 
@@ -98,7 +106,7 @@ public class Enemyai2 : MonoBehaviour
                 RangeAttack();
             }
             else
-            { 
+            {
                 MeleeAttack(); 
             }
             AlreadyAttacked = true;
