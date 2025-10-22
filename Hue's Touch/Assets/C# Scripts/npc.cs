@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 
+
 public class NPCDialogue : MonoBehaviour 
 {
     [Header("Interaction Settings")]

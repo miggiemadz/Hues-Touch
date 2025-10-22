@@ -3,15 +3,28 @@ using UnityEngine.UI;
 
 public class Health : MonoBehaviour // I HATE UI IT SUCKSSSSSSS ;-;
 {
+    [Header("Grounded Movement Variables")]
     public float maxHealth = 100f;
-    public float currentHealth;
-    private Image healthFill;
-    [SerializeField] private bool ShowHealthBar = true;
-    public EnemySpawner spawner;
-    public void Start()
+    private float currentHealth;
+    public healthScript healthBar;
+
+    [Header("Respawn Variables")]
+    public float threshold; // minimum y-value until player respawns(-10)
+    public GameObject respawnScreen; //to show respawn screen
+    public GameManager gameManagerScript;
+
+    //TO-DO: new healthbar-> use splatter sprite & create dull version for lost heart/damage
+
+
+
+    //private Image healthFill;
+    //[SerializeField] private bool ShowHealthBar = true;
+
+    public void Start() 
     {
-        currentHealth = maxHealth;
-        if (ShowHealthBar)
+        currentHealth = maxHealth; //set player health to 100 when game starts
+        healthBar.setMaxHealth((int)maxHealth); //for healthbar (changing it to int because setMaxHealth method is a dick)
+        /*if (ShowHealthBar)
         {
             // Create Canvas
             GameObject canvasGO = new GameObject("HealthBarCanvas");
@@ -47,38 +60,48 @@ public class Health : MonoBehaviour // I HATE UI IT SUCKSSSSSSS ;-;
             fillRect.anchorMax = Vector2.one;
             fillRect.offsetMin = Vector2.zero;
             fillRect.offsetMax = Vector2.zero;
-        }
+        }*/
     }
+
     private void Update()
     {
-        if (ShowHealthBar)
+
+        //DAMAGE TEST (bc its not working w dummy atm)
+        if (Input.GetKeyDown(KeyCode.Space))
         {
-            UpdateHealthBar();
+            TakeDamage(20);
         }
+
+        //fill.fillAmount = currentHealth / maxHealth;
     }
 
-    private void UpdateHealthBar()
+    public void FixedUpdate()
     {
-        if (ShowHealthBar)
+        //if player falls off map/if player health = 0
+        if (transform.position.y < threshold || currentHealth == 0) //if playerhealth<0 or if player reaches threshold/falls off map
         {
-            float normalized = currentHealth / maxHealth;
-            normalized = Mathf.Clamp01(normalized);
-            
-            // Scale the X of the fill
-            healthFill.rectTransform.localScale = new Vector3(normalized, 1, 1);
+            Debug.Log("Dead");
+            gameManagerScript.gameOver(); //accessing func from gamemanager (display respawn screen)
         }
     }
 
+
+    //4 whenever damage is taken (for ex: takeDamage(20) is called on ln 65)
     public void TakeDamage(float amount)
     {
         currentHealth -= amount;
-        GetComponent<EnemyAI>()?.Provoke();
-        if (currentHealth <= 0)
-        {
-            Debug.Log("Dead");
-            Destroy(gameObject);
-                spawner?.EnemyDied();
-        }
-        
+        healthBar.setHealth((int)currentHealth);
     }
+
+    //private void UpdateHealthBar()
+    //{
+    //    if (ShowHealthBar)
+    //    {
+    //        float normalized = currentHealth / maxHealth;
+    //        normalized = Mathf.Clamp01(normalized);
+
+    //        // Scale the X of the fill
+    //        healthFill.rectTransform.localScale = new Vector3(normalized, 1, 1);
+    //    }
+    //}
 }
